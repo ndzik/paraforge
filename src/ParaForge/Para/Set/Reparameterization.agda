@@ -11,15 +11,16 @@ module ParaForge.Para.Set.Reparameterization where
 -- This captures common modeling decisions as explicit parameter maps. For
 -- example, p ↦ (p , p) ties two independent weights, (U , V) ↦ U V embeds a
 -- low-rank layer into a general matrix layer, and p ↦ (p , … , p) shares one
--- parameter across an unrolled recurrent network. Vertical composition then
--- combines such restrictions while preserving their behavioral guarantees.
+-- parameter across an unrolled recurrent network. Vertical composition chains
+-- restrictions of one layer; horizontal composition lifts local restrictions
+-- through sequential layers while preserving their behavioral guarantees.
 
 open import Level using (Level; _⊔_)
-open import Data.Product.Base using (_,_)
+open import Data.Product.Base using (_×_; _,_)
 open import Function.Base using (id)
 open import Relation.Binary.Bundles using (Setoid)
 open import Relation.Binary.PropositionalEquality.Core
-  using (_≡_; refl; cong)
+  using (_≡_; refl; cong; cong₂)
   renaming (sym to ≡-sym; trans to ≡-trans)
 
 open import ParaForge.Para.Set
@@ -182,3 +183,95 @@ _∘ᵥ_ :
   (α : Reparameterization F G) →
   ((γ ∘ᵥ β) ∘ᵥ α) ≈ (γ ∘ᵥ (β ∘ᵥ α))
 ∘ᵥ-assoc γ β α targetParameter = refl
+
+-- Horizontal composition lifts reparameterizations through sequential
+-- composition. For an outer cell β and inner cell α, the backwards map acts
+-- componentwise on the composite parameter product.
+horizontalMap :
+  ∀ {o p p′ q q′ : Level} {A B C : Set o}
+    {F : Para {o = o} {p = p} A B}
+    {F′ : Para {o = o} {p = p′} A B}
+    {G : Para {o = o} {p = q} B C}
+    {G′ : Para {o = o} {p = q′} B C} →
+  Reparameterization G G′ →
+  Reparameterization F F′ →
+  Parameters G′ × Parameters F′ →
+  Parameters G × Parameters F
+horizontalMap β α (outerParameter , innerParameter) =
+  mapParameters β outerParameter , mapParameters α innerParameter
+
+horizontalPreserves :
+  ∀ {o p p′ q q′ : Level} {A B C : Set o}
+    {F : Para {o = o} {p = p} A B}
+    {F′ : Para {o = o} {p = p′} A B}
+    {G : Para {o = o} {p = q} B C}
+    {G′ : Para {o = o} {p = q′} B C} →
+  (β : Reparameterization G G′) →
+  (α : Reparameterization F F′) →
+  ∀ targetParameter a →
+  run (G′ ∘ₚ F′) (targetParameter , a) ≡
+  run (G ∘ₚ F) (horizontalMap β α targetParameter , a)
+horizontalPreserves {F′ = F′} {G = G} β α
+  (outerParameter , innerParameter) a =
+  ≡-trans
+    (preserves-run β outerParameter
+      (run F′ (innerParameter , a)))
+    (cong
+      (λ intermediate →
+        run G (mapParameters β outerParameter , intermediate))
+      (preserves-run α innerParameter a))
+
+infixr 11 _∘ₕ_
+
+_∘ₕ_ :
+  ∀ {o p p′ q q′ : Level} {A B C : Set o}
+    {F : Para {o = o} {p = p} A B}
+    {F′ : Para {o = o} {p = p′} A B}
+    {G : Para {o = o} {p = q} B C}
+    {G′ : Para {o = o} {p = q′} B C} →
+  Reparameterization G G′ →
+  Reparameterization F F′ →
+  Reparameterization (G ∘ₚ F) (G′ ∘ₚ F′)
+β ∘ₕ α = mkReparameterization
+  (horizontalMap β α)
+  (horizontalPreserves β α)
+
+∘ₕ-resp-≈ :
+  ∀ {o p p′ q q′ : Level} {A B C : Set o}
+    {F : Para {o = o} {p = p} A B}
+    {F′ : Para {o = o} {p = p′} A B}
+    {G : Para {o = o} {p = q} B C}
+    {G′ : Para {o = o} {p = q′} B C}
+    {α α′ : Reparameterization F F′}
+    {β β′ : Reparameterization G G′} →
+  β ≈ β′ → α ≈ α′ →
+  (β ∘ₕ α) ≈ (β′ ∘ₕ α′)
+∘ₕ-resp-≈ β≈β′ α≈α′ (outerParameter , innerParameter) =
+  cong₂ _,_
+    (β≈β′ outerParameter)
+    (α≈α′ innerParameter)
+
+∘ₕ-identity :
+  ∀ {o p q : Level} {A B C : Set o}
+    {F : Para {o = o} {p = p} A B}
+    {G : Para {o = o} {p = q} B C} →
+  (id₂ {F = G} ∘ₕ id₂ {F = F}) ≈ id₂ {F = G ∘ₚ F}
+∘ₕ-identity targetParameter = refl
+
+-- Interchange says that composing local restrictions before assembling the
+-- layers agrees pointwise with assembling each stage before composing it.
+interchange :
+  ∀ {o p₀ p₁ p₂ q₀ q₁ q₂ : Level} {A B C : Set o}
+    {F₀ : Para {o = o} {p = p₀} A B}
+    {F₁ : Para {o = o} {p = p₁} A B}
+    {F₂ : Para {o = o} {p = p₂} A B}
+    {G₀ : Para {o = o} {p = q₀} B C}
+    {G₁ : Para {o = o} {p = q₁} B C}
+    {G₂ : Para {o = o} {p = q₂} B C} →
+  (β₁ : Reparameterization G₀ G₁) →
+  (β₂ : Reparameterization G₁ G₂) →
+  (α₁ : Reparameterization F₀ F₁) →
+  (α₂ : Reparameterization F₁ F₂) →
+  ((β₂ ∘ᵥ β₁) ∘ₕ (α₂ ∘ᵥ α₁)) ≈
+  ((β₂ ∘ₕ α₂) ∘ᵥ (β₁ ∘ₕ α₁))
+interchange β₁ β₂ α₁ α₂ targetParameter = refl
