@@ -23,3 +23,7 @@ Later on I will explore my own ideas and incorporate more reference resources to
 # Why?
 
 It's fun.
+
+# AI Note
+
+Yes, I am collaborating with an agent while developing this. It's just faster, what can I say.
