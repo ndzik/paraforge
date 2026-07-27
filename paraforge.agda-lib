@@ -1,0 +1,4 @@
+name: paraforge
+include: src
+depend: standard-library-2.4
+	agda-categories
