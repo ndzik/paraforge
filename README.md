@@ -17,8 +17,19 @@ I am also grateful to all the contributors of [Agda](https://github.com/agda/agd
 
 # Current State
 
-I am mainly focused on translating some of the claims made in the aforementioned paper.
-Later on I will explore my own ideas and incorporate more reference resources to see how rich this can get.
+ParaForge provides a universe-polymorphic, executable model of `Para(Set)` in which:
+
+- parameterized maps `P × A → B` can be evaluated and composed;
+- behavior-preserving reparameterizations can be constructed and composed vertically and horizontally;
+- copy maps express weight tying as a restriction of an untied model;
+- finite folding recurrent cells can be unrolled with either independent or shared parameters;
+- the shared unrolling is witnessed by a repeated-diagonal reparameterization.
+
+The concrete construction is packaged as an `agda-categories` `Bicategory`. Its hom-categories, composition bifunctor, unitors, associator, naturality, interchange, triangle, and pentagon laws are machine checked. This makes identity insertion and reassociation of parameter products coherent rather than treating products as definitionally strict.
+
+Relative to the paper, the library currently checks the concrete `Set` instance of Definition G.1, including its target-to-source 2-cell orientation, the diagonal interpretation of weight tying, the folding-cell signature from Example I.1, and a finite operational form of the shared recurrent fold from Example J.1.
+
+It does not yet formalize general actegories, strong 2-monads, lax algebra machinery, Theorem G.10, transfinite unrolling, differentiation, or training semantics. All current modules type-check under `--safe --without-K`, without postulates, function extensionality, proof irrelevance, or UIP.
 
 # Why?
 
