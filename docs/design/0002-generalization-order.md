@@ -39,7 +39,13 @@ Let `C : Category o ℓ e`. A generic parameterized morphism stores:
 
 Consequently the raw 1-cell record lives in `Set (o ⊔ ℓ)`. The equality level `e` is absent from the raw record and enters with the categorical preservation equations and hom-setoid equality of reparameterizations.
 
-Universe levels will remain explicit through hom-category and bicategory packaging. The `Sets` self-action necessarily places parameters, inputs, and outputs in one object universe; it will not silently replace the concrete model's independent object and parameter levels.
+A reparameterization stores a morphism at level `ℓ` and a preservation equation at level `e`, so it lives in `Set (ℓ ⊔ e)`. For fixed interfaces, the resulting hom-category has levels:
+
+```text
+Category (o ⊔ ℓ) (ℓ ⊔ e) e
+```
+
+Universe levels will remain explicit through bicategory packaging. The `Sets` self-action necessarily places parameters, inputs, and outputs in one object universe; it will not silently replace the concrete model's independent object and parameter levels.
 
 ## Consequences
 
