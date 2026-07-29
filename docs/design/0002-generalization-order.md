@@ -53,6 +53,18 @@ Bicategory (o ⊔ ℓ) (ℓ ⊔ e) e o
 
 The `Sets` self-action necessarily places parameters, inputs, and outputs in one object universe; it will not silently replace the concrete model's independent object and parameter levels.
 
+## Sets specialization result
+
+At a common level `ℓ`, instantiating with the cartesian monoidal structure on `Sets ℓ` produces:
+
+```text
+Bicategory (suc ℓ) ℓ ℓ (suc ℓ)
+```
+
+This is the same level signature as the concrete `ParaSet ℓ ℓ`. Generic and concrete 1-cells and G.1 cells admit structure-preserving translations whose evaluators and parameter maps agree pointwise. Identity, `Q × P` sequential composition, and diagonal weight tying execute through the generic specialization.
+
+This correspondence is intentionally restricted to `o = p = ℓ`. Recovering a concrete `ParaSet o p` with independent levels would require explicit lifting between universes and possibly between distinct categories; the tensor self-action alone does not provide such a construction.
+
 ## Consequences
 
 - The next implementation can test generic composition and coherence against a mature monoidal API before designing a new action hierarchy.
