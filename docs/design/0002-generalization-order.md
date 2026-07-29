@@ -45,7 +45,13 @@ A reparameterization stores a morphism at level `ℓ` and a preservation equatio
 Category (o ⊔ ℓ) (ℓ ⊔ e) e
 ```
 
-Universe levels will remain explicit through bicategory packaging. The `Sets` self-action necessarily places parameters, inputs, and outputs in one object universe; it will not silently replace the concrete model's independent object and parameter levels.
+The complete tensor self-action therefore packages as:
+
+```text
+Bicategory (o ⊔ ℓ) (ℓ ⊔ e) e o
+```
+
+The `Sets` self-action necessarily places parameters, inputs, and outputs in one object universe; it will not silently replace the concrete model's independent object and parameter levels.
 
 ## Consequences
 
