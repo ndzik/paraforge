@@ -65,6 +65,23 @@ This is the same level signature as the concrete `ParaSet ℓ ℓ`. Generic and 
 
 This correspondence is intentionally restricted to `o = p = ℓ`. Recovering a concrete `ParaSet o p` with independent levels would require explicit lifting between universes and possibly between distinct categories; the tensor self-action alone does not provide such a construction.
 
+## Actegory extraction boundary
+
+The next generalization can reuse the parameter-side algebra directly:
+
+- structural parameter maps remain the unitors and associator of the monoidal parameter category;
+- inverse, naturality, triangle, and pentagon equations between those maps remain monoidal hom-setoid proofs;
+- cell equality, hom-category packaging, and the outer bicategory assembly retain their present shapes.
+
+The evaluator-side proofs must instead be generalized:
+
+- `P ⊗ A ⇒ B` becomes `P ⊙ A ⇒ B`;
+- reparameterization preservation must use the action on `(r , id)`;
+- horizontal preservation must combine tensor functoriality on parameters with action functoriality on evaluators;
+- unitor and associator preservation must use the action unit and associativity isomorphisms, rather than the self-action's monoidal coherence alone.
+
+Thus the proof architecture is reusable, but the self-action evaluator equations must not be copied unchanged or treated as the definition of an actegory. Copying and discarding remain outside the extracted action interface.
+
 ## Consequences
 
 - The next implementation can test generic composition and coherence against a mature monoidal API before designing a new action hierarchy.

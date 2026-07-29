@@ -2,6 +2,12 @@
 
 module ParaForge where
 
+-- The root namespace remains the executable concrete API. The generic
+-- self-action API is re-exported as the qualified ParaForge.Monoidal facade so
+-- names such as Para, idₚ, and _∘ₚ_ do not become ambiguous.
+import ParaForge.Monoidal as GenericMonoidal
+module Monoidal = GenericMonoidal
+
 open import ParaForge.Para.Set public
   using
     ( Para; mkPara; Parameters; run

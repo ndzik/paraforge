@@ -17,19 +17,49 @@ I am also grateful to all the contributors of [Agda](https://github.com/agda/agd
 
 # Current State
 
-ParaForge provides a universe-polymorphic, executable model of `Para(Set)` in which:
+ParaForge provides two machine-checked forms of `Para`:
 
-- parameterized maps `P × A → B` can be evaluated and composed;
-- behavior-preserving reparameterizations can be constructed and composed vertically and horizontally;
-- copy maps express weight tying as a restriction of an untied model;
-- finite folding recurrent cells can be unrolled with either independent or shared parameters;
-- the shared unrolling is witnessed by a repeated-diagonal reparameterization.
+- an executable, universe-polymorphic `Para(Set)` reference model;
+- a generic `Para(C)` for the tensor self-action of any `agda-categories` monoidal category `C`.
 
-The concrete construction is packaged as an `agda-categories` `Bicategory`. Its hom-categories, composition bifunctor, unitors, associator, naturality, interchange, triangle, and pentagon laws are machine checked. This makes identity insertion and reassociation of parameter products coherent rather than treating products as definitionally strict.
+Both constructions implement the Definition G.1 orientation: a cell `F ⇒ G` carries a parameter morphism from the parameters of `G` back to those of `F`. Sequential composition uses parameter order `Q ⊗ P`. The generic construction packages its hom-categories, horizontal composition, unitors, associator, naturality, interchange, triangle, and pentagon as an `agda-categories` `Bicategory`.
 
-Relative to the paper, the library currently checks the concrete `Set` instance of Definition G.1, including its target-to-source 2-cell orientation, the diagonal interpretation of weight tying, the folding-cell signature from Example I.1, and a finite operational form of the shared recurrent fold from Example J.1.
+The concrete model additionally provides executable copying operations. These express weight tying as a restriction of an untied model and support finite folding recurrent cells with either independent or shared parameters. Copying is deliberately not assumed by the bare monoidal construction.
 
-It does not yet formalize general actegories, strong 2-monads, lax algebra machinery, Theorem G.10, transfinite unrolling, differentiation, or training semantics. All current modules type-check under `--safe --without-K`, without postulates, function extensionality, proof irrelevance, or UIP.
+The cartesian `Sets` specialization connects both models at a common universe level. Identity, composition, parameter order, G.1 cells, and diagonal weight tying agree pointwise. It does not identify complete proof-containing records.
+
+## Stable imports
+
+The root facade is the concrete executable API:
+
+```agda
+open import ParaForge
+```
+
+The generic API is namespaced to avoid collisions with concrete names such as `Para`, `idₚ`, and `_∘ₚ_`:
+
+```agda
+import ParaForge.Monoidal as Monoidal
+```
+
+`ParaForge.Monoidal` exports generic parameterized maps and cells, hom-categories, coherence cells and laws, `ParaMonoidal`, and the cartesian `Sets` specialization. Lower-level modules under `ParaForge.Para.Monoidal.*` expose implementation details and evaluator-preservation lemmas but are not the stable facade.
+
+## Universe constraints
+
+For `C : Category o ℓ e` and `M : Monoidal C`, the generic levels are:
+
+```text
+Para M A B                         : Set (o ⊔ ℓ)
+Reparameterization M F G          : Set (ℓ ⊔ e)
+Hom M A B                         : Category (o ⊔ ℓ) (ℓ ⊔ e) e
+ParaMonoidal M                    : Bicategory (o ⊔ ℓ) (ℓ ⊔ e) e o
+```
+
+Specializing to `Sets ℓ` gives `Bicategory (suc ℓ) ℓ ℓ (suc ℓ)`, corresponding to concrete `ParaSet ℓ ℓ`. The concrete model still permits independent data and parameter levels `o` and `p`; the tensor self-action does not recover that freedom without an explicit lifting or a more general action.
+
+Relative to the paper, the library currently checks the concrete `Set` instance of Definition G.1, the generic monoidal self-action case, the diagonal interpretation of weight tying, the folding-cell signature from Example I.1, and a finite operational form of the shared recurrent fold from Example J.1.
+
+General actegories, strong 2-monads, lax algebra machinery, Theorem G.10, transfinite unrolling, differentiation, and training semantics remain future work. All current modules type-check under `--safe --without-K`, without postulates, function extensionality, proof irrelevance, or UIP.
 
 # Why?
 
