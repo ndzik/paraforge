@@ -87,6 +87,25 @@ record Strength
         (M.id 𝒜.⊙₁ σ Q A) 𝒞.∘
         𝒜.associator.⇒.η ((P , Q) , F.F₀ A))
 
+  -- Joint naturality specialized to a parameter map and an identity
+  -- computation map, normalized so downstream G.1 proofs see literal
+  -- identities rather than F₁ id.
+  strength-natural-id :
+    ∀ {P Q : M.Obj} {A : 𝒞.Obj} (r : P M.⇒ Q) →
+    (σ Q A 𝒞.∘ (r 𝒜.⊙₁ 𝒞.id {A = F.F₀ A}))
+      𝒞.≈
+    (F.F₁ (r 𝒜.⊙₁ 𝒞.id {A = A}) 𝒞.∘ σ P A)
+  strength-natural-id {P = P} {Q = Q} {A = A} r = begin
+    σ Q A 𝒞.∘ (r 𝒜.⊙₁ 𝒞.id)
+      ≈˘⟨ 𝒞.Equiv.refl ⟩∘⟨
+        𝒜.action.F-resp-≈ (M.Equiv.refl , F.identity) ⟩
+    σ Q A 𝒞.∘ 𝒜.action.F₁ (r , F.F₁ 𝒞.id)
+      ≈⟨ strengthen.commute (r , 𝒞.id) ⟩
+    F.F₁ (r 𝒜.⊙₁ 𝒞.id) 𝒞.∘ σ P A
+      ∎
+    where
+      open 𝒞.HomReasoning
+
 -- An endofunctor together with actegorical strength. Keeping Strength
 -- separate lets a future strong-monad interface reuse the same data.
 record StrongEndofunctor
