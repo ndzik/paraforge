@@ -14,7 +14,7 @@ open import Categories.Functor.Construction.Constant using (const)
 open import Categories.NaturalTransformation.NaturalIsomorphism
   using (niHelper)
 
-open import ParaForge.Actegory using (Actegory)
+open import ParaForge.Actegory.Core using (Actegory)
 open import ParaForge.Para.Actegory
 open import ParaForge.Para.Actegory.Reparameterization
 open import ParaForge.Para.Actegory.Hom using (Hom)

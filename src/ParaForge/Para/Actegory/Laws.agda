@@ -10,7 +10,7 @@ open import Categories.Category.Monoidal.Core using (Monoidal)
 import Categories.Category.Monoidal.Utilities as MonoidalUtilities
 import Categories.Morphism.Reasoning as MorphismReasoning
 
-open import ParaForge.Actegory using (Actegory)
+open import ParaForge.Actegory.Core using (Actegory)
 open import ParaForge.Para.Actegory
 open import ParaForge.Para.Actegory.Reparameterization
 

@@ -8,7 +8,7 @@ open import Data.Product.Base using (_,_)
 open import Categories.Category.Core using (Category)
 open import Categories.Category.Monoidal.Core using (Monoidal)
 
-open import ParaForge.Actegory using (Actegory)
+open import ParaForge.Actegory.Core using (Actegory)
 
 private
   variable

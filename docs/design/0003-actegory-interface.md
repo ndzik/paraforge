@@ -124,7 +124,19 @@ P ⊙ A = P ⊗ A
 
 Its action functor is the monoidal tensor bifunctor. Its unit and action associativity isomorphisms are the monoidal left unitor and associator. The actegory triangle and pentagon reduce definitionally to the corresponding `Monoidal` fields.
 
-This instance is the required bridge back to Milestone 2. The future actegory-based Para implementation must recover the tensor self-action through this value rather than define a second unrelated instance.
+This instance is the required bridge back to Milestone 2. The actegory-based Para implementation recovers the tensor self-action through this value rather than defining a second unrelated instance.
+
+## Self-action recovery result
+
+Instantiating `ParaActegory` with `tensorSelfAction V` yields:
+
+```text
+SelfActionPara V : Bicategory (o ⊔ ℓ) (ℓ ⊔ e) e o
+```
+
+which has the same level signature as `ParaMonoidal V`. The two constructions are connected by bidirectional translations that preserve parameter objects, evaluator morphisms, and target-to-source parameter maps definitionally. Ambient hom-setoid equations establish identity and `Q ⊗ P` composition agreement. Cell equality establishes identity, vertical composition, and horizontal composition agreement.
+
+The comparison deliberately does not assert propositional equality of complete Para, cell, or bicategory records. Preservation proofs remain construction data but are not observable cell equality. No copy or discard map is used anywhere in the correspondence.
 
 ## Consequences
 

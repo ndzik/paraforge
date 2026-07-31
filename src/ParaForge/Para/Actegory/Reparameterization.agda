@@ -10,7 +10,7 @@ open import Categories.Category.Core using (Category)
 open import Categories.Category.Monoidal.Core using (Monoidal)
 import Categories.Category.Monoidal.Reasoning as MonoidalReasoning
 
-open import ParaForge.Actegory using (Actegory)
+open import ParaForge.Actegory.Core using (Actegory)
 open import ParaForge.Para.Actegory
 
 private

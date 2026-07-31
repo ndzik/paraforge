@@ -17,16 +17,17 @@ I am also grateful to all the contributors of [Agda](https://github.com/agda/agd
 
 # Current State
 
-ParaForge provides two machine-checked forms of `Para`:
+ParaForge provides three connected, machine-checked forms of `Para`:
 
 - an executable, universe-polymorphic `Para(Set)` reference model;
-- a generic `Para(C)` for the tensor self-action of any `agda-categories` monoidal category `C`.
+- a generic `Para(C)` for the tensor self-action of any `agda-categories` monoidal category `C`;
+- a general `Para(M ↷ C)` for a monoidal parameter category acting coherently on an independent computation category.
 
-Both constructions implement the Definition G.1 orientation: a cell `F ⇒ G` carries a parameter morphism from the parameters of `G` back to those of `F`. Sequential composition uses parameter order `Q ⊗ P`. The generic construction packages its hom-categories, horizontal composition, unitors, associator, naturality, interchange, triangle, and pentagon as an `agda-categories` `Bicategory`.
+All three constructions implement the Definition G.1 orientation: a cell `F ⇒ G` carries a parameter morphism from the parameters of `G` back to those of `F`. Sequential composition uses parameter order `Q ⊗ P`. The generic constructions package their hom-categories, horizontal composition, unitors, associator, naturality, interchange, triangle, and pentagon as `agda-categories` bicategories.
 
 The concrete model additionally provides executable copying operations. These express weight tying as a restriction of an untied model and support finite folding recurrent cells with either independent or shared parameters. Copying is deliberately not assumed by the bare monoidal construction.
 
-The cartesian `Sets` specialization connects both models at a common universe level. Identity, composition, parameter order, G.1 cells, and diagonal weight tying agree pointwise. It does not identify complete proof-containing records.
+The cartesian `Sets` specialization connects the concrete and monoidal models at a common universe level. The tensor self-action specialization similarly connects the actegory and monoidal models. Their identity, composition, parameter order, and G.1 cells agree under component-preserving translations; complete proof-containing bicategory records are not equated.
 
 ## Stable imports
 
@@ -36,13 +37,14 @@ The root facade is the concrete executable API:
 open import ParaForge
 ```
 
-The generic API is namespaced to avoid collisions with concrete names such as `Para`, `idₚ`, and `_∘ₚ_`:
+The generic APIs are namespaced to avoid collisions with concrete names such as `Para`, `idₚ`, and `_∘ₚ_`:
 
 ```agda
 import ParaForge.Monoidal as Monoidal
+import ParaForge.Actegory as Actegory
 ```
 
-`ParaForge.Monoidal` exports generic parameterized maps and cells, hom-categories, coherence cells and laws, `ParaMonoidal`, and the cartesian `Sets` specialization. Lower-level modules under `ParaForge.Para.Monoidal.*` expose implementation details and evaluator-preservation lemmas but are not the stable facade.
+`ParaForge.Monoidal` exports the tensor self-action construction and its cartesian `Sets` specialization. `ParaForge.Actegory` exports the coherent action interface, general parameterized maps and cells, `ParaActegory`, and the checked tensor self-action correspondence. Lower-level modules under `ParaForge.Para.*` and `ParaForge.Actegory.Core` remain implementation modules.
 
 ## Universe constraints
 
@@ -55,11 +57,19 @@ Hom M A B                         : Category (o ⊔ ℓ) (ℓ ⊔ e) e
 ParaMonoidal M                    : Bicategory (o ⊔ ℓ) (ℓ ⊔ e) e o
 ```
 
-Specializing to `Sets ℓ` gives `Bicategory (suc ℓ) ℓ ℓ (suc ℓ)`, corresponding to concrete `ParaSet ℓ ℓ`. The concrete model still permits independent data and parameter levels `o` and `p`; the tensor self-action does not recover that freedom without an explicit lifting or a more general action.
+For `M : Category oₘ ℓₘ eₘ` acting on `C : Category o𝒞 ℓ𝒞 e𝒞`, the general construction has levels:
 
-Relative to the paper, the library currently checks the concrete `Set` instance of Definition G.1, the generic monoidal self-action case, the diagonal interpretation of weight tying, the folding-cell signature from Example I.1, and a finite operational form of the shared recurrent fold from Example J.1.
+```text
+Para A X Y                         : Set (oₘ ⊔ ℓ𝒞)
+Reparameterization A F G          : Set (ℓₘ ⊔ e𝒞)
+ParaActegory A                    : Bicategory (oₘ ⊔ ℓ𝒞) (ℓₘ ⊔ e𝒞) eₘ o𝒞
+```
 
-General actegories, strong 2-monads, lax algebra machinery, Theorem G.10, transfinite unrolling, differentiation, and training semantics remain future work. All current modules type-check under `--safe --without-K`, without postulates, function extensionality, proof irrelevance, or UIP.
+Specializing to `Sets ℓ` gives `Bicategory (suc ℓ) ℓ ℓ (suc ℓ)`, corresponding to concrete `ParaSet ℓ ℓ`. General actions permit parameter and computation categories to have independent levels without an implicit lifting construction.
+
+Relative to the paper, the library now checks the general actegory setting of Definition G.1, its monoidal self-action and concrete `Set` specializations, the diagonal interpretation of weight tying, the folding-cell signature from Example I.1, and a finite operational form of the shared recurrent fold from Example J.1.
+
+Cartesian copying/discarding, strong 2-monads, lax algebra machinery, Theorem G.10, transfinite unrolling, differentiation, and training semantics remain future work. All current modules type-check under `--safe --without-K`, without postulates, function extensionality, proof irrelevance, or UIP.
 
 # Why?
 

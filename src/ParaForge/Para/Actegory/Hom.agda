@@ -8,7 +8,7 @@ open import Relation.Binary.Bundles using (Setoid)
 open import Categories.Category.Core using (Category)
 open import Categories.Category.Monoidal.Core using (Monoidal)
 
-open import ParaForge.Actegory using (Actegory)
+open import ParaForge.Actegory.Core using (Actegory)
 open import ParaForge.Para.Actegory
 open import ParaForge.Para.Actegory.Reparameterization
 
