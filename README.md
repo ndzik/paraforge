@@ -44,7 +44,7 @@ import ParaForge.Monoidal as Monoidal
 import ParaForge.Actegory as Actegory
 ```
 
-`ParaForge.Monoidal` exports the tensor self-action construction and its cartesian `Sets` specialization. `ParaForge.Actegory` exports the coherent action interface, general parameterized maps and cells, `ParaActegory`, and the checked tensor self-action correspondence. Lower-level modules under `ParaForge.Para.*` and `ParaForge.Actegory.Core` remain implementation modules.
+`ParaForge.Monoidal` exports the tensor self-action construction and its cartesian `Sets` specialization. `ParaForge.Actegory` exports the coherent action interface, general parameterized maps and cells, canonical parameter restriction, `ParaActegory`, and the checked tensor self-action correspondence. Lower-level modules under `ParaForge.Para.*` and `ParaForge.Actegory.Core` should be considered internal implementation modules.
 
 ## Universe constraints
 

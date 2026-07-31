@@ -33,6 +33,17 @@ open import ParaForge.Para.Actegory.Reparameterization public
     ; _∘ₕ_; ∘ₕ-resp-≈; ∘ₕ-identity; interchange
     )
 
+open import ParaForge.Para.Actegory.Restriction public
+  using
+    ( restrictParameters; restrictCell
+    ; restrict-identity-run; restrict-identity-comparison
+    ; restrict-identity-cell
+    ; restrict-compose-run; restrict-compose-comparison
+    ; restrict-compose-cell
+    ; restrict-horizontal-run; restrict-horizontal-comparison
+    ; restrict-horizontal-cell
+    )
+
 open import ParaForge.Para.Actegory.Hom public
   using (Hom)
 
