@@ -44,6 +44,22 @@ open import ParaForge.Para.Actegory.Restriction public
     ; restrict-horizontal-cell
     )
 
+open import ParaForge.Para.Actegory.Sharing public
+  using
+    ( ParameterComonoid
+    ; copyParameter; discardParameter
+    ; copyParameter3ˡ; copyParameter3ʳ; copyParameter3-coherent
+    ; dropLeftParameter; dropRightParameter
+    ; dropLeft-copy; dropRight-copy
+    ; CocommutativeParameter; swappedCopyParameter
+    ; counitalCopyComonoid; counitalCopy-cocommutative
+    ; untiedParameterPair; tieParameterPair; tieParameterPairCell
+    ; untiedParameterTriple
+    ; tieParameterTriple; tieParameterTripleAlternative
+    ; tieParameterTriple-run-coherent
+    ; tieParameterPairSwapped; tieParameterPair-commutative-run
+    )
+
 open import ParaForge.Para.Actegory.Hom public
   using (Hom)
 
