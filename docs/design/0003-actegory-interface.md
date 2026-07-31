@@ -71,6 +71,15 @@ The triangle law is:
   ≈ monoidalRightUnitorP ⊙ idA
 ```
 
+The interface also stores the standard left-unit coherence consequence:
+
+```text
+unitor(P ⊙ A) ∘ actionAssociator(I,P,A)
+  ≈ monoidalLeftUnitorP ⊙ idA
+```
+
+This equation is derivable from actegory coherence, just as `coherence₁` is derived for a monoidal category. Keeping its witness in the interface avoids making the Para layer depend on a separate general actegory coherence theorem. The tensor self-action supplies it with `MonoidalProperties.coherence₁`.
+
 The pentagon law is:
 
 ```text
@@ -93,6 +102,17 @@ Set (oₘ ⊔ ℓₘ ⊔ eₘ ⊔ o𝒞 ⊔ ℓ𝒞 ⊔ e𝒞)
 ```
 
 No equality or lifting between the parameter and computation category universes is required.
+
+The resulting actegory-based Para construction has levels:
+
+```text
+Para A X Y                         : Set (oₘ ⊔ ℓ𝒞)
+Reparameterization A F G          : Set (ℓₘ ⊔ e𝒞)
+Hom A X Y                         : Category (oₘ ⊔ ℓ𝒞) (ℓₘ ⊔ e𝒞) eₘ
+ParaActegory A                    : Bicategory (oₘ ⊔ ℓ𝒞) (ℓₘ ⊔ e𝒞) eₘ o𝒞
+```
+
+Parameter morphisms and their equality remain in `M`; evaluator equations remain in `C`. In particular, `eₘ` governs 2-cell equality while `e𝒞` appears in the proof-carrying 2-cell level.
 
 ## Tensor self-action
 

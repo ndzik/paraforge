@@ -7,6 +7,7 @@ open import Data.Product.Base using (_,_)
 
 open import Categories.Category.Core using (Category)
 open import Categories.Category.Monoidal.Core using (Monoidal)
+import Categories.Category.Monoidal.Properties as MonoidalProperties
 open import Categories.Category.Product
   using (Product; _⁂_; assocˡ)
 open import Categories.Functor
@@ -70,6 +71,17 @@ record Actegory
   module associator = NaturalIsomorphism associator
 
   field
+    -- This is the left-unit coherence consequence used by the left Para
+    -- unitor. It is derivable from the standard actegory axioms, but storing
+    -- it explicitly keeps downstream evaluator proofs independent of a full
+    -- actegory coherence theorem.
+    unitorˡ-coherence :
+      ∀ {P : M.Obj} {A : 𝒞.Obj} →
+      (unitor.⇒.η (P ⊙₀ A) 𝒞.∘
+        associator.⇒.η ((V.unit , P) , A))
+        𝒞.≈
+      (V.unitorˡ.from ⊙₁ 𝒞.id)
+
     triangle :
       ∀ {P : M.Obj} {A : 𝒞.Obj} →
       ((M.id ⊙₁ unitor.⇒.η A) 𝒞.∘
@@ -107,6 +119,7 @@ tensorSelfAction {𝒞 = 𝒞} V = record
       ; commute = λ _ → V.assoc-commute-from
       ; iso = λ _ → V.associator.iso
       }
+  ; unitorˡ-coherence = MonoidalProperties.coherence₁ V
   ; triangle = V.triangle
   ; pentagon = V.pentagon
   }
