@@ -29,6 +29,8 @@ The concrete model provides executable copying operations. The generic actegory 
 
 The cartesian `Sets` specialization connects all three models at a common universe level. Identity, composition, parameter order, G.1 cells, two-way weight tying, and three-way finite-fold sharing agree under component-preserving translations and explicit product reassociation; complete proof-containing records are not equated.
 
+Strong actegorical endofunctors now lift pseudofunctorially to the weak Para bicategory. The executable `Sets` instance for `1 + A × -` recovers the existing folding-cell interface and finite-list recurrence pointwise; `O × -` supplies the corresponding parameterized state-machine coalgebra shape. Parameter restriction and comonoid sharing commute with the lift.
+
 ## Stable imports
 
 The root facade is the concrete executable API:
@@ -44,7 +46,7 @@ import ParaForge.Monoidal as Monoidal
 import ParaForge.Actegory as Actegory
 ```
 
-`ParaForge.Monoidal` exports the tensor self-action construction and its cartesian `Sets` specialization. `ParaForge.Actegory` exports the coherent action interface, general parameterized maps and cells, canonical parameter restriction, explicit parameter-comonoid sharing and deletion, the validated `Sets` sharing instance, `ParaActegory`, and the checked specialization correspondences. Lower-level modules under `ParaForge.Para.*` and `ParaForge.Actegory.Core` should be considered internal implementation modules.
+`ParaForge.Monoidal` exports the tensor self-action construction and its cartesian `Sets` specialization. `ParaForge.Actegory` exports the coherent action interface, general parameterized maps and cells, canonical parameter restriction, explicit parameter-comonoid sharing and deletion, strong endofunctors and their Para pseudofunctor lift, algebra/coalgebra structure-map types, the validated `Sets` instances, `ParaActegory`, and the checked specialization correspondences. Lower-level modules under `ParaForge.Para.*` and `ParaForge.Actegory.Core` should be considered internal implementation modules.
 
 ## Universe constraints
 
@@ -63,13 +65,17 @@ For `M : Category oₘ ℓₘ eₘ` acting on `C : Category o𝒞 ℓ𝒞 e𝒞`
 Para A X Y                         : Set (oₘ ⊔ ℓ𝒞)
 Reparameterization A F G          : Set (ℓₘ ⊔ e𝒞)
 ParaActegory A                    : Bicategory (oₘ ⊔ ℓ𝒞) (ℓₘ ⊔ e𝒞) eₘ o𝒞
+Strength A F                      : Set (oₘ ⊔ ℓₘ ⊔ o𝒞 ⊔ ℓ𝒞 ⊔ e𝒞)
+StrongEndofunctor A               : Set (oₘ ⊔ ℓₘ ⊔ o𝒞 ⊔ ℓ𝒞 ⊔ e𝒞)
+Algebra S X                       : Set (oₘ ⊔ ℓ𝒞)
+Coalgebra S X                     : Set (oₘ ⊔ ℓ𝒞)
 ```
 
 Specializing to `Sets ℓ` gives `Bicategory (suc ℓ) ℓ ℓ (suc ℓ)`, corresponding to concrete `ParaSet ℓ ℓ`. General actions permit parameter and computation categories to have independent levels without an implicit lifting construction.
 
-Relative to the paper, the library now checks the general actegory setting of Definition G.1, its monoidal self-action and concrete `Set` specializations, the diagonal interpretation of weight tying, the folding-cell signature from Example I.1, and a finite operational form of the shared recurrent fold from Example J.1.
+Relative to the paper, the library now checks the general actegory setting of Definition G.1, its monoidal self-action and concrete `Set` specializations, the diagonal interpretation of weight tying, the strong-endofunctor lift underlying Example G.8, the algebraic folding-cell signature from Example I.1, the coalgebraic state-machine shape from Example I.3, and a finite operational form of the shared recurrent fold from Example J.1.
 
-Lax algebra-induced comonoids, strong 2-monads, Theorem G.10, transfinite unrolling, differentiation, and training semantics remain future work. All current modules type-check under `--safe --without-K`, without postulates, function extensionality, proof irrelevance, or UIP.
+Strong actegorical monads and their induced pseudomonads, lax algebra-induced comonoids, Theorem G.10, transfinite unrolling, differentiation, and training semantics remain future work. All current modules type-check under `--safe --without-K`, without postulates, function extensionality, proof irrelevance, or UIP.
 
 # Why?
 

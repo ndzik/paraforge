@@ -17,10 +17,37 @@ open import ParaForge.Actegory.Core public
     ; pentagon to actionPentagon
     )
 
+open import ParaForge.Actegory.Strong.Endofunctor public
+  using
+    ( strengthSource; strengthTarget
+    ; Strength; StrongEndofunctor
+    ; strengthen; σ
+    ; unit-coherence; associativity-coherence
+    ; strength-natural-id
+    )
+  renaming
+    ( F to endofunctor
+    ; strength to endofunctorStrength
+    )
+
 open import ParaForge.Para.Actegory public
   using
     ( Para; mkPara; Parameters; run
     ; idₚ; _∘ₚ_
+    )
+
+open import ParaForge.Para.Actegory.Strong.Algebra public
+  using (Algebra; Coalgebra)
+
+open import ParaForge.Para.Actegory.Strong.Endofunctor public
+  using
+    ( liftPara; lift-preserves
+    ; liftCell; liftCell-id; liftCell-compose; liftCell-resp-≈
+    ; liftHom; lift-composition-run; lift-identity-run
+    ; identity-comparison; identity-comparison⁻¹
+    ; composition-comparison; composition-comparison⁻¹
+    ; lift-restriction-run; lift-sharing-run
+    ; liftPseudofunctor
     )
 
 open import ParaForge.Para.Actegory.Reparameterization public
@@ -83,6 +110,12 @@ open import ParaForge.Para.Actegory.Instance.Sets public
     ; Sets-ParameterComonoid; Sets-ParameterCocommutative
     ; toConcrete; fromConcrete
     ; toConcreteCell; fromConcreteCell
+    )
+
+open import ParaForge.Actegory.Strong.Instance.Sets public
+  using
+    ( FoldingFunctor; FoldingStrength; FoldingStrongEndofunctor
+    ; UnfoldingFunctor; UnfoldingStrength; UnfoldingStrongEndofunctor
     )
 
 open import ParaForge.Para.Actegory.Instance.Monoidal public

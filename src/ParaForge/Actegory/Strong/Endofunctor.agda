@@ -121,3 +121,5 @@ record StrongEndofunctor
 
   module F = Functor F
   open Strength strength public
+
+open StrongEndofunctor public
