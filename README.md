@@ -25,9 +25,9 @@ ParaForge provides three connected, machine-checked forms of `Para`:
 
 All three constructions implement the Definition G.1 orientation: a cell `F ⇒ G` carries a parameter morphism from the parameters of `G` back to those of `F`. Sequential composition uses parameter order `Q ⊗ P`. The generic constructions package their hom-categories, horizontal composition, unitors, associator, naturality, interchange, triangle, and pentagon as `agda-categories` bicategories.
 
-The concrete model additionally provides executable copying operations. These express weight tying as a restriction of an untied model and support finite folding recurrent cells with either independent or shared parameters. Copying is deliberately not assumed by the bare monoidal construction.
+The concrete model provides executable copying operations. The generic actegory model derives the same weight tying from explicit comonoid structure on parameter objects, while bare monoidal categories and actegories continue to assume no copying or deletion. Coassociativity governs repeated sharing, and optional cocommutativity governs permutation-invariant sharing.
 
-The cartesian `Sets` specialization connects the concrete and monoidal models at a common universe level. The tensor self-action specialization similarly connects the actegory and monoidal models. Their identity, composition, parameter order, and G.1 cells agree under component-preserving translations; complete proof-containing bicategory records are not equated.
+The cartesian `Sets` specialization connects all three models at a common universe level. Identity, composition, parameter order, G.1 cells, two-way weight tying, and three-way finite-fold sharing agree under component-preserving translations and explicit product reassociation; complete proof-containing records are not equated.
 
 ## Stable imports
 
@@ -44,7 +44,7 @@ import ParaForge.Monoidal as Monoidal
 import ParaForge.Actegory as Actegory
 ```
 
-`ParaForge.Monoidal` exports the tensor self-action construction and its cartesian `Sets` specialization. `ParaForge.Actegory` exports the coherent action interface, general parameterized maps and cells, canonical parameter restriction, explicit parameter-comonoid sharing and deletion, `ParaActegory`, and the checked tensor self-action correspondence. Lower-level modules under `ParaForge.Para.*` and `ParaForge.Actegory.Core` should be considered internal implementation modules.
+`ParaForge.Monoidal` exports the tensor self-action construction and its cartesian `Sets` specialization. `ParaForge.Actegory` exports the coherent action interface, general parameterized maps and cells, canonical parameter restriction, explicit parameter-comonoid sharing and deletion, the validated `Sets` sharing instance, `ParaActegory`, and the checked specialization correspondences. Lower-level modules under `ParaForge.Para.*` and `ParaForge.Actegory.Core` should be considered internal implementation modules.
 
 ## Universe constraints
 
@@ -69,7 +69,7 @@ Specializing to `Sets ℓ` gives `Bicategory (suc ℓ) ℓ ℓ (suc ℓ)`, corre
 
 Relative to the paper, the library now checks the general actegory setting of Definition G.1, its monoidal self-action and concrete `Set` specializations, the diagonal interpretation of weight tying, the folding-cell signature from Example I.1, and a finite operational form of the shared recurrent fold from Example J.1.
 
-Cartesian copying/discarding, strong 2-monads, lax algebra machinery, Theorem G.10, transfinite unrolling, differentiation, and training semantics remain future work. All current modules type-check under `--safe --without-K`, without postulates, function extensionality, proof irrelevance, or UIP.
+Lax algebra-induced comonoids, strong 2-monads, Theorem G.10, transfinite unrolling, differentiation, and training semantics remain future work. All current modules type-check under `--safe --without-K`, without postulates, function extensionality, proof irrelevance, or UIP.
 
 # Why?
 

@@ -77,6 +77,14 @@ open import ParaForge.Para.Actegory.Laws public
 open import ParaForge.Para.Actegory.Bicategory public
   using (composition; ParaActegory)
 
+open import ParaForge.Para.Actegory.Instance.Sets public
+  using
+    ( Sets-Monoidal; Sets-Actegory; Sets-Symmetric
+    ; Sets-ParameterComonoid; Sets-ParameterCocommutative
+    ; toConcrete; fromConcrete
+    ; toConcreteCell; fromConcreteCell
+    )
+
 open import ParaForge.Para.Actegory.Instance.Monoidal public
   using
     ( SelfActionPara; MonoidalPara
