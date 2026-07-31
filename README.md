@@ -21,7 +21,7 @@ ParaForge provides three connected, machine-checked forms of `Para`:
 
 - an executable, universe-polymorphic `Para(Set)` reference model;
 - a generic `Para(C)` for the tensor self-action of any `agda-categories` monoidal category `C`;
-- a general `Para(M ↷ C)` for a monoidal parameter category acting coherently on an independent computation category.
+- a general `Para(M ↷ C)` for a monoidal parameter category acting coherently on an independent computation category. (For the curious reader: `↷` is `\curvearrowright` and can be read as "parameter category `M` acts on the computation category `C`)
 
 All three constructions implement the Definition G.1 orientation: a cell `F ⇒ G` carries a parameter morphism from the parameters of `G` back to those of `F`. Sequential composition uses parameter order `Q ⊗ P`. The generic constructions package their hom-categories, horizontal composition, unitors, associator, naturality, interchange, triangle, and pentagon as `agda-categories` bicategories.
 
