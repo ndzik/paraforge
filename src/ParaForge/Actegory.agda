@@ -30,6 +30,12 @@ open import ParaForge.Actegory.Strong.Endofunctor public
     ; strength to endofunctorStrength
     )
 
+open import ParaForge.Actegory.Strong.Monad public
+  using
+    ( StrongMonad; strongEndofunctor
+    ; multiplication-coherence; monad-unit-coherence
+    )
+
 open import ParaForge.Para.Actegory public
   using
     ( Para; mkPara; Parameters; run
@@ -116,6 +122,12 @@ open import ParaForge.Actegory.Strong.Instance.Sets public
   using
     ( FoldingFunctor; FoldingStrength; FoldingStrongEndofunctor
     ; UnfoldingFunctor; UnfoldingStrength; UnfoldingStrongEndofunctor
+    )
+
+open import ParaForge.Actegory.Strong.Instance.Sets.Monad public
+  using
+    ( ExceptionFunctor; ExceptionUnit; ExceptionJoin; ExceptionMonad
+    ; ExceptionStrength; ExceptionStrongMonad
     )
 
 open import ParaForge.Para.Actegory.Instance.Monoidal public
