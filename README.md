@@ -33,6 +33,8 @@ Strong actegorical endofunctors now lift pseudofunctorially to the weak Para bic
 
 Strong actegorical monads reuse `agda-categories` monad data and add exactly AS3 multiplication compatibility and AS4 unit compatibility to the existing strength. The executable exception monad `E ⊎ -` validates every failure/success branch and forgets to the strong endofunctor consumed by the existing Para pseudofunctor lift.
 
+Their Para lift now carries weak pseudomonad data. Unit and multiplication components use parameter `I` and eliminate its action with the actegory unitor. Their invertible pseudonaturality cells compare `I ⊗ P` with `P ⊗ I` using only the canonical unit-swap built from left and right unitors—no braiding is assumed. AS4 proves unit pseudonaturality, AS3 proves multiplication pseudonaturality, and the source monad laws induce component associativity and unit cells whose parameter maps normalize in `M`.
+
 ## Stable imports
 
 The root facade is the concrete executable API:
@@ -48,7 +50,7 @@ import ParaForge.Monoidal as Monoidal
 import ParaForge.Actegory as Actegory
 ```
 
-`ParaForge.Monoidal` exports the tensor self-action construction and its cartesian `Sets` specialization. `ParaForge.Actegory` exports the coherent action interface, general parameterized maps and cells, canonical parameter restriction, explicit parameter-comonoid sharing and deletion, strong endofunctors and their Para pseudofunctor lift, strong actegorical monads, algebra/coalgebra structure-map types, the validated `Sets` instances, `ParaActegory`, and the checked specialization correspondences. Lower-level modules under `ParaForge.Para.*` and `ParaForge.Actegory.Core` should be considered internal implementation modules.
+`ParaForge.Monoidal` exports the tensor self-action construction and its cartesian `Sets` specialization. `ParaForge.Actegory` exports the coherent action interface, general parameterized maps and cells, canonical parameter restriction, explicit parameter-comonoid sharing and deletion, strong endofunctors and their Para pseudofunctor lift, strong actegorical monads and their Para pseudomonad certificates, algebra/coalgebra structure-map types, the validated `Sets` instances, `ParaActegory`, and the checked specialization correspondences. Lower-level modules under `ParaForge.Para.*` and `ParaForge.Actegory.Core` should be considered internal implementation modules.
 
 ## Universe constraints
 
@@ -70,6 +72,7 @@ ParaActegory A                    : Bicategory (oₘ ⊔ ℓ𝒞) (ℓₘ ⊔ e�
 Strength A F                      : Set (oₘ ⊔ ℓₘ ⊔ o𝒞 ⊔ ℓ𝒞 ⊔ e𝒞)
 StrongEndofunctor A               : Set (oₘ ⊔ ℓₘ ⊔ o𝒞 ⊔ ℓ𝒞 ⊔ e𝒞)
 StrongMonad A                     : Set (oₘ ⊔ ℓₘ ⊔ o𝒞 ⊔ ℓ𝒞 ⊔ e𝒞)
+ParaPseudomonad S                 : Set (oₘ ⊔ ℓₘ ⊔ eₘ ⊔ o𝒞 ⊔ ℓ𝒞 ⊔ e𝒞)
 Algebra S X                       : Set (oₘ ⊔ ℓ𝒞)
 Coalgebra S X                     : Set (oₘ ⊔ ℓ𝒞)
 ```
@@ -78,7 +81,9 @@ Specializing to `Sets ℓ` gives `Bicategory (suc ℓ) ℓ ℓ (suc ℓ)`, corre
 
 Relative to the paper, the library now checks the general actegory setting of Definition G.1, its monoidal self-action and concrete `Set` specializations, the diagonal interpretation of weight tying, the strong-endofunctor lift underlying Example G.8, the strong-monad coherence of Definitions E.6/E.9, the algebraic folding-cell signature from Example I.1, the coalgebraic state-machine shape from Example I.3, and a finite operational form of the shared recurrent fold from Example J.1.
 
-The induced Para pseudomonad, lax algebra-induced comonoids, Theorem G.10, transfinite unrolling, differentiation, and training semantics remain future work. All current modules type-check under `--safe --without-K`, without postulates, function extensionality, proof irrelevance, or UIP.
+Lax algebra-induced comonoids, Theorem G.10, transfinite unrolling, differentiation, and training semantics remain future work.
+
+Unlike the paper's strict presentation of Example G.8, ParaForge retains the parameter tensor unitors and action coherence explicitly. Since the current `agda-categories` release has pseudofunctors but no pseudonatural-transformation, modification, or pseudomonad records, `ParaPseudomonad` is a specialized certificate for this induced Para construction rather than a competing general bicategorical API. All current modules type-check under `--safe --without-K`, without postulates, function extensionality, proof irrelevance, or UIP.
 
 # Why?
 

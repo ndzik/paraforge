@@ -56,6 +56,25 @@ open import ParaForge.Para.Actegory.Strong.Endofunctor public
     ; liftPseudofunctor
     )
 
+open import ParaForge.Para.Actegory.Strong.Monad public
+  using
+    ( ParaPseudomonad; liftPseudomonad
+    ; underlyingPseudofunctor
+    ; unitPara; multiplicationPara
+    ; unitSwap; unitSwap⁻¹; unitSwap-natural
+    ; unitNaturality; unitNaturality⁻¹
+    ; unitNaturality-map
+    ; unitNaturality-isoˡ; unitNaturality-isoʳ
+    ; multiplicationNaturality; multiplicationNaturality⁻¹
+    ; multiplicationNaturality-map
+    ; multiplicationNaturality-isoˡ
+    ; multiplicationNaturality-isoʳ
+    ; leftUnitCoherence; rightUnitCoherence
+    ; associativityCoherence
+    ; leftUnitCoherence-map; rightUnitCoherence-map
+    ; associativityCoherence-map
+    )
+
 open import ParaForge.Para.Actegory.Reparameterization public
   using
     ( Reparameterization; mkReparameterization
