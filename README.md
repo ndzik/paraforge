@@ -17,27 +17,100 @@ I am also grateful to all the contributors of [Agda](https://github.com/agda/agd
 
 # Current State
 
-ParaForge provides three connected, machine-checked forms of `Para`:
+ParaForge can describe, compose, execute, and analyze typed parameterized architectures without committing them to a numerical machine-learning backend.
+
+## Parameterized computations
+
+A parameterized computation from `A` to `B` consists of a parameter object `P` and an evaluator `P ⊙ A → B`. ParaForge provides this construction at three levels:
 
 - an executable, universe-polymorphic `Para(Set)` reference model;
-- a generic `Para(C)` for the tensor self-action of any `agda-categories` monoidal category `C`;
-- a general `Para(M ↷ C)` for a monoidal parameter category acting coherently on an independent computation category. (For the curious reader: `↷` is `\curvearrowright` and can be read as "parameter category `M` acts on the computation category `C`)
+- `Para(C)` for the tensor self-action of a monoidal category `C`;
+- `Para(M ↷ C)` for parameters in a monoidal category `M` acting on an independent computation category `C`.
 
-All three constructions implement the Definition G.1 orientation: a cell `F ⇒ G` carries a parameter morphism from the parameters of `G` back to those of `F`. Sequential composition uses parameter order `Q ⊗ P`. The generic constructions package their hom-categories, horizontal composition, unitors, associator, naturality, interchange, triangle, and pentagon as `agda-categories` bicategories.
+Parameterized computations support identity and sequential composition. Composition combines the later parameters `Q` with the earlier parameters `P` in the order `Q ⊗ P`. The generic constructions form weak bicategories with explicit unitors, associators, naturality, interchange, triangle, and pentagon coherence.
 
-The concrete model provides executable copying operations. The generic actegory model derives the same weight tying from explicit comonoid structure on parameter objects, while bare monoidal categories and actegories continue to assume no copying or deletion. Coassociativity governs repeated sharing, and optional cocommutativity governs permutation-invariant sharing.
+## Reparameterization and sharing
 
-The cartesian `Sets` specialization connects all three models at a common universe level. Identity, composition, parameter order, G.1 cells, two-way weight tying, and three-way finite-fold sharing agree under component-preserving translations and explicit product reassociation; complete proof-containing records are not equated.
+A transformation `F ⇒ G` follows Definition G.1 and carries a parameter map from the parameters of `G` back to those of `F`. This makes reparameterization a behavior-preserving restriction: the target architecture can only realize behavior already represented by the source.
 
-Strong actegorical endofunctors now lift pseudofunctorially to the weak Para bicategory. The executable `Sets` instance for `1 + A × -` recovers the existing folding-cell interface and finite-list recurrence pointwise; `O × -` supplies the corresponding parameterized state-machine coalgebra shape. Parameter restriction and comonoid sharing commute with the lift.
+ParaForge supports:
 
-Strong actegorical monads reuse `agda-categories` monad data and add exactly AS3 multiplication compatibility and AS4 unit compatibility to the existing strength. The executable exception monad `E ⊎ -` validates every failure/success branch and forgets to the strong endofunctor consumed by the existing Para pseudofunctor lift.
+- arbitrary typed parameter restriction;
+- weight tying by restriction along a copy map;
+- parameter deletion through a counit;
+- repeated sharing governed by coassociativity;
+- optional permutation-invariant sharing when cocommutativity is available;
+- identity, vertical, and horizontal composition of architecture transformations.
 
-Their Para lift now carries weak pseudomonad data. Unit and multiplication components use parameter `I` and eliminate its action with the actegory unitor. Their invertible pseudonaturality cells compare `I ⊗ P` with `P ⊗ I` using only the canonical unit-swap built from left and right unitors—no braiding is assumed. AS4 proves unit pseudonaturality, AS3 proves multiplication pseudonaturality, and the source monad laws induce component associativity and unit cells whose parameter maps normalize in `M`.
+Copying and deletion are never assumed from a bare monoidal category or actegory. They require an explicit comonoid on the relevant parameter object.
 
-A lax algebra consists of a parameterized structure map `a : T A → A`, a G.1 cell `id ⇒ a ∘ η`, and a G.1 cell `a ∘ T(a) ⇒ a ∘ μ`. For `Parameters a = P`, these orientations expose `P ⊗ I → I` and `P ⊗ I → P ⊗ P`; composing with the right unitor gives the normalized deletion and copying maps. Lax unity and associativity are checked in the parameter hom-setoid. Lax algebra structural morphisms use cells `b ∘ T(f) ⇒ f ∘ a`, with identity and composition formed by explicit pseudofunctor comparisons, unitors, and associators.
+## Architecture language
 
-## Stable imports
+`ParaForge.Architecture` provides an intrinsically typed Agda-embedded architecture language. An architecture records its parameter context, input interface, and output interface in its type. The language includes:
+
+- primitive operations from an extensible typed signature;
+- sequential and parallel composition;
+- activation fan-out and structural data wiring;
+- residual composition;
+- explicit parameter bindings and lexical parameter sharing;
+- independent and shared finite repetition;
+- typed architecture transformations.
+
+The core distinguishes sequential `CoreArch` syntax from the cartesian `CartesianArch` dataflow extension. A `Network` keeps its untied primitive occurrences separate from the external parameter binding that controls independence, deletion, permutation, or sharing.
+
+A sequential classifier can be written as:
+
+```agda
+mlp =
+  dense 2 3 >>>
+  relu 3 >>>
+  dense 3 1 >>>
+  softmax 1
+```
+
+Transformer parameters are ordinary, intrinsically typed Agda references. Named branches can share one lexical parameter scope with `_>>>ˢ_`, while `residualTokens` inserts activation fan-out and recombination:
+
+```agda
+attentionBranch =
+  layerNormUsing firstNormParameter >>>ˢ
+  selfAttentionUsing attentionParameter
+
+encoderBlock =
+  residualTokens sequenceLength modelWidth attentionBranch >>>ˢ
+  residualTokens sequenceLength modelWidth feedForwardBranch
+```
+
+`repeatIndependent` gives each block its own external parameter context. `repeatSharedNeural` uses one context for every occurrence, covering architectures such as ALBERT-style shared Transformer stacks.
+
+## Interpretation and inspection
+
+The same architecture description can be interpreted in more than one way:
+
+- the executable `Sets` model runs lightweight reference evaluators and makes parameter order and sharing observable;
+- the symbolic model reports typed nodes, composition depth, raw parameter occurrences, external parameter count, and sharing classes.
+
+For example, two shared Transformer blocks have eight parameter-consuming occurrences but only four external parameter variables. Their symbolic sharing classes are:
+
+```text
+[0, 1, 2, 3, 0, 1, 2, 3]
+```
+
+The executable architecture model intentionally uses small scalar stand-ins. ParaForge does not yet provide tensor kernels, automatic differentiation, optimization, or integration with an ML runtime. Attention is represented as an architecture-level primitive rather than expanded into tensor contractions.
+
+## Algebraic structure and recurrence
+
+The generic API also provides:
+
+- strong actegorical endofunctors and their pseudofunctorial lift to `Para`;
+- strong actegorical monads and specialized weak pseudomonad data on `Para`;
+- algebras and coalgebras for parameterized structure maps;
+- lax algebras and structural lax algebra morphisms;
+- extraction of parameter comonoids from lax algebra coherence;
+- finite shared folds and parameterized state-machine examples.
+
+The executable examples include folding cells, finite-list folds, exception algebras, unfolding coalgebra shapes, MLPs, Transformer blocks, and independent or shared architecture repetition.
+
+## Imports
 
 The root facade is the concrete executable API:
 
@@ -52,7 +125,13 @@ import ParaForge.Monoidal as Monoidal
 import ParaForge.Actegory as Actegory
 ```
 
-`ParaForge.Monoidal` exports the tensor self-action construction and its cartesian `Sets` specialization. `ParaForge.Actegory` exports the coherent action interface, general parameterized maps and cells, canonical parameter restriction, explicit parameter-comonoid sharing and deletion, strong endofunctors and their Para pseudofunctor lift, strong actegorical monads and their Para pseudomonad certificates, lax algebras and their induced parameter comonoids, algebra/coalgebra structure-map types, the validated `Sets` instances, `ParaActegory`, and the checked specialization correspondences. Lower-level modules under `ParaForge.Para.*` and `ParaForge.Actegory.Core` should be considered internal implementation modules.
+The architecture language is exposed through a separate facade:
+
+```agda
+open import ParaForge.Architecture
+```
+
+`ParaForge.Monoidal` exports the tensor self-action construction and its cartesian `Sets` specialization. `ParaForge.Actegory` exports the coherent action interface, generic parameterized maps and cells, parameter restriction, comonoid sharing and deletion, strong endofunctors and monads, their Para lifts, lax algebras, induced parameter comonoids, algebra and coalgebra structure maps, `Sets` instances, and `ParaActegory`. Lower-level modules under `ParaForge.Para.*` and `ParaForge.Actegory.Core` are implementation modules.
 
 ## Universe constraints
 
@@ -82,11 +161,15 @@ Coalgebra S X                     : Set (oₘ ⊔ ℓ𝒞)
 
 Specializing to `Sets ℓ` gives `Bicategory (suc ℓ) ℓ ℓ (suc ℓ)`, corresponding to concrete `ParaSet ℓ ℓ`. General actions permit parameter and computation categories to have independent levels without an implicit lifting construction.
 
-Relative to the paper, the library now checks the general actegory setting of Definition G.1, its monoidal self-action and concrete `Set` specializations, the diagonal interpretation of weight tying, the strong-endofunctor lift underlying Example G.8, the strong-monad coherence of Definitions E.6/E.9, and the weak Para-specialized form of Theorem G.10. It also validates the algebraic folding-cell signature from Example I.1, the coalgebraic state-machine shape from Example I.3, and a finite operational form of the shared recurrent fold from Example J.1.
+## Formal guarantees and scope
 
-The extracted lax-algebra comonoid reuses `ParameterComonoid`; its sharing operation is exactly restriction along `algebraCopy` and agrees with `tieParameterPair`. Transfinite unrolling, differentiation, and training semantics remain future work.
+ParaForge retains weak monoidal, actegory, and bicategorical coherence explicitly rather than strictifying parameter products. Equalities between transformations are stated through the relevant categorical hom-setoids instead of propositional equality of proof-containing records.
 
-Unlike the paper's strict presentation of Example G.8, ParaForge retains the parameter tensor unitors and action coherence explicitly. Since the current `agda-categories` release has pseudofunctors but no pseudonatural-transformation, modification, or pseudomonad records, `ParaPseudomonad` is a specialized certificate for this induced Para construction rather than a competing general bicategorical API. All current modules type-check under `--safe --without-K`, without postulates, function extensionality, proof irrelevance, or UIP.
+The formalization covers the general actegory form of Definition G.1, monoidal self-actions and concrete `Set` specializations, diagonal weight tying, strong endofunctor and monad lifts, lax algebra parameter comonoids, algebraic folding cells, coalgebraic state-machine cells, and finite shared recurrence.
+
+`ParaPseudomonad` is a Para-specific certificate because `agda-categories` does not provide general records for pseudonatural transformations, modifications, or pseudomonads. It does not replace a general bicategorical API.
+
+All Agda modules type-check under `--safe --without-K`, without postulates, function extensionality, proof irrelevance, or UIP. Tensor runtimes, infinite unrolling, streams, differentiation, optimization, and training semantics are outside the implemented scope.
 
 # Why?
 
