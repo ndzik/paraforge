@@ -56,6 +56,17 @@ open import ParaForge.Para.Actegory.Strong.Endofunctor public
     ; liftPseudofunctor
     )
 
+open import ParaForge.Para.Actegory.Strong.LaxAlgebra public
+  using
+    ( LaxAlgebra; structure; unitCell; multiplicationCell
+    ; algebraDiscard; algebraCopy
+    ; rawDiscardParameter; rawCopyParameter
+    ; LaxAlgebraMorphismCell; structureCell
+    ; LaxAlgebraMorphism; underlying; algebraCell
+    ; identityStructureCell; composeStructureCell
+    ; identityMorphism; _∘ₐ_
+    )
+
 open import ParaForge.Para.Actegory.Strong.Monad public
   using
     ( ParaPseudomonad; liftPseudomonad

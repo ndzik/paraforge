@@ -35,6 +35,8 @@ Strong actegorical monads reuse `agda-categories` monad data and add exactly AS3
 
 Their Para lift now carries weak pseudomonad data. Unit and multiplication components use parameter `I` and eliminate its action with the actegory unitor. Their invertible pseudonaturality cells compare `I ⊗ P` with `P ⊗ I` using only the canonical unit-swap built from left and right unitors—no braiding is assumed. AS4 proves unit pseudonaturality, AS3 proves multiplication pseudonaturality, and the source monad laws induce component associativity and unit cells whose parameter maps normalize in `M`.
 
+A lax algebra consists of a parameterized structure map `a : T A → A`, a G.1 cell `id ⇒ a ∘ η`, and a G.1 cell `a ∘ T(a) ⇒ a ∘ μ`. For `Parameters a = P`, these orientations expose `P ⊗ I → I` and `P ⊗ I → P ⊗ P`; composing with the right unitor gives the normalized deletion and copying maps. Lax unity and associativity are checked in the parameter hom-setoid. Lax algebra structural morphisms use cells `b ∘ T(f) ⇒ f ∘ a`, with identity and composition formed by explicit pseudofunctor comparisons, unitors, and associators.
+
 ## Stable imports
 
 The root facade is the concrete executable API:
@@ -73,6 +75,7 @@ Strength A F                      : Set (oₘ ⊔ ℓₘ ⊔ o𝒞 ⊔ ℓ𝒞 �
 StrongEndofunctor A               : Set (oₘ ⊔ ℓₘ ⊔ o𝒞 ⊔ ℓ𝒞 ⊔ e𝒞)
 StrongMonad A                     : Set (oₘ ⊔ ℓₘ ⊔ o𝒞 ⊔ ℓ𝒞 ⊔ e𝒞)
 ParaPseudomonad S                 : Set (oₘ ⊔ ℓₘ ⊔ eₘ ⊔ o𝒞 ⊔ ℓ𝒞 ⊔ e𝒞)
+LaxAlgebra S X                    : Set (oₘ ⊔ ℓₘ ⊔ eₘ ⊔ ℓ𝒞 ⊔ e𝒞)
 Algebra S X                       : Set (oₘ ⊔ ℓ𝒞)
 Coalgebra S X                     : Set (oₘ ⊔ ℓ𝒞)
 ```
@@ -81,7 +84,7 @@ Specializing to `Sets ℓ` gives `Bicategory (suc ℓ) ℓ ℓ (suc ℓ)`, corre
 
 Relative to the paper, the library now checks the general actegory setting of Definition G.1, its monoidal self-action and concrete `Set` specializations, the diagonal interpretation of weight tying, the strong-endofunctor lift underlying Example G.8, the strong-monad coherence of Definitions E.6/E.9, the algebraic folding-cell signature from Example I.1, the coalgebraic state-machine shape from Example I.3, and a finite operational form of the shared recurrent fold from Example J.1.
 
-Lax algebra-induced comonoids, Theorem G.10, transfinite unrolling, differentiation, and training semantics remain future work.
+Packaging the normalized lax algebra maps as the existing `ParameterComonoid`, the weak form of Theorem G.10, transfinite unrolling, differentiation, and training semantics remain future work.
 
 Unlike the paper's strict presentation of Example G.8, ParaForge retains the parameter tensor unitors and action coherence explicitly. Since the current `agda-categories` release has pseudofunctors but no pseudonatural-transformation, modification, or pseudomonad records, `ParaPseudomonad` is a specialized certificate for this induced Para construction rather than a competing general bicategorical API. All current modules type-check under `--safe --without-K`, without postulates, function extensionality, proof irrelevance, or UIP.
 
