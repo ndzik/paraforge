@@ -56,6 +56,16 @@ open import ParaForge.Para.Actegory.Strong.Endofunctor public
     ; liftPseudofunctor
     )
 
+open import ParaForge.Para.Actegory.Strong.LaxAlgebra.Comonoid public
+  using
+    ( PairEvaluator
+    ; laxAlgebraParameterComonoid
+    ; extractedDiscard-agrees; extractedCopy-agrees
+    ; tieLaxParameterPair; tieLaxParameterPairCell
+    ; tieLaxParameterPair-agrees
+    ; tieLaxParameterPairCell-agrees
+    )
+
 open import ParaForge.Para.Actegory.Strong.LaxAlgebra public
   using
     ( LaxAlgebra; structure; unitCell; multiplicationCell

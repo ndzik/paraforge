@@ -52,7 +52,7 @@ import ParaForge.Monoidal as Monoidal
 import ParaForge.Actegory as Actegory
 ```
 
-`ParaForge.Monoidal` exports the tensor self-action construction and its cartesian `Sets` specialization. `ParaForge.Actegory` exports the coherent action interface, general parameterized maps and cells, canonical parameter restriction, explicit parameter-comonoid sharing and deletion, strong endofunctors and their Para pseudofunctor lift, strong actegorical monads and their Para pseudomonad certificates, algebra/coalgebra structure-map types, the validated `Sets` instances, `ParaActegory`, and the checked specialization correspondences. Lower-level modules under `ParaForge.Para.*` and `ParaForge.Actegory.Core` should be considered internal implementation modules.
+`ParaForge.Monoidal` exports the tensor self-action construction and its cartesian `Sets` specialization. `ParaForge.Actegory` exports the coherent action interface, general parameterized maps and cells, canonical parameter restriction, explicit parameter-comonoid sharing and deletion, strong endofunctors and their Para pseudofunctor lift, strong actegorical monads and their Para pseudomonad certificates, lax algebras and their induced parameter comonoids, algebra/coalgebra structure-map types, the validated `Sets` instances, `ParaActegory`, and the checked specialization correspondences. Lower-level modules under `ParaForge.Para.*` and `ParaForge.Actegory.Core` should be considered internal implementation modules.
 
 ## Universe constraints
 
@@ -82,9 +82,9 @@ Coalgebra S X                     : Set (oₘ ⊔ ℓ𝒞)
 
 Specializing to `Sets ℓ` gives `Bicategory (suc ℓ) ℓ ℓ (suc ℓ)`, corresponding to concrete `ParaSet ℓ ℓ`. General actions permit parameter and computation categories to have independent levels without an implicit lifting construction.
 
-Relative to the paper, the library now checks the general actegory setting of Definition G.1, its monoidal self-action and concrete `Set` specializations, the diagonal interpretation of weight tying, the strong-endofunctor lift underlying Example G.8, the strong-monad coherence of Definitions E.6/E.9, the algebraic folding-cell signature from Example I.1, the coalgebraic state-machine shape from Example I.3, and a finite operational form of the shared recurrent fold from Example J.1.
+Relative to the paper, the library now checks the general actegory setting of Definition G.1, its monoidal self-action and concrete `Set` specializations, the diagonal interpretation of weight tying, the strong-endofunctor lift underlying Example G.8, the strong-monad coherence of Definitions E.6/E.9, and the weak Para-specialized form of Theorem G.10. It also validates the algebraic folding-cell signature from Example I.1, the coalgebraic state-machine shape from Example I.3, and a finite operational form of the shared recurrent fold from Example J.1.
 
-Packaging the normalized lax algebra maps as the existing `ParameterComonoid`, the weak form of Theorem G.10, transfinite unrolling, differentiation, and training semantics remain future work.
+The extracted lax-algebra comonoid reuses `ParameterComonoid`; its sharing operation is exactly restriction along `algebraCopy` and agrees with `tieParameterPair`. Transfinite unrolling, differentiation, and training semantics remain future work.
 
 Unlike the paper's strict presentation of Example G.8, ParaForge retains the parameter tensor unitors and action coherence explicitly. Since the current `agda-categories` release has pseudofunctors but no pseudonatural-transformation, modification, or pseudomonad records, `ParaPseudomonad` is a specialized certificate for this induced Para construction rather than a competing general bicategorical API. All current modules type-check under `--safe --without-K`, without postulates, function extensionality, proof irrelevance, or UIP.
 
