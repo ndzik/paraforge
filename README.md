@@ -19,6 +19,10 @@ I am also grateful to all the contributors of [Agda](https://github.com/agda/agd
 
 ParaForge can describe, compose, execute, and analyze typed parameterized architectures without committing them to a numerical machine-learning backend.
 
+The bulk and most interesting parts of the paper are implemented.
+Right now I am drafting an updated category that explicitly models "learning".
+The hypothesis is, that this overview might give a little more insights into extracting "structural components" of trained models.
+
 ## Parameterized computations
 
 A parameterized computation from `A` to `B` consists of a parameter object `P` and an evaluator `P ⊙ A → B`. ParaForge provides this construction at three levels:
