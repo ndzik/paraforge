@@ -101,6 +101,12 @@ For example, two shared Transformer blocks have eight parameter-consuming occurr
 
 The executable architecture model intentionally uses small scalar stand-ins. ParaForge does not yet provide tensor kernels, automatic differentiation, optimization, or integration with an ML runtime. Attention is represented as an architecture-level primitive rather than expanded into tensor contractions.
 
+## Feedback lenses
+
+`ParaForge.Learning` provides a separate executable layer for bidirectional computations. A `FeedbackInterface` keeps forward values distinct from the feedback sent against them. A `Lens` supplies forward evaluation and backward feedback propagation, with identity and sequential composition packaged as an `agda-categories` category under pointwise behavioral equality.
+
+`ParametricLens` additionally separates parameter values from parameter signals. Composition retains the ParaForge order `Q × P`, propagates feedback in reverse execution order, and returns signals as `Q♭ × P♭`. The initial implementation recomputes intermediate activations during propagation. It does not yet define gradients, update policies, training loops, or an interpretation of architecture terms.
+
 ## Algebraic structure and recurrence
 
 The generic API also provides:
@@ -129,10 +135,11 @@ import ParaForge.Monoidal as Monoidal
 import ParaForge.Actegory as Actegory
 ```
 
-The architecture language is exposed through a separate facade:
+The architecture and learning languages are exposed through separate facades:
 
 ```agda
 open import ParaForge.Architecture
+open import ParaForge.Learning
 ```
 
 `ParaForge.Monoidal` exports the tensor self-action construction and its cartesian `Sets` specialization. `ParaForge.Actegory` exports the coherent action interface, generic parameterized maps and cells, parameter restriction, comonoid sharing and deletion, strong endofunctors and monads, their Para lifts, lax algebras, induced parameter comonoids, algebra and coalgebra structure maps, `Sets` instances, and `ParaActegory`. Lower-level modules under `ParaForge.Para.*` and `ParaForge.Actegory.Core` are implementation modules.
