@@ -7,7 +7,8 @@ open import Data.Product.Base using (_×_; _,_)
 open import Data.Unit.Polymorphic.Base using (tt)
 
 open import ParaForge.Learning.Interface
-open import ParaForge.Learning.Lens using (Lens; lens)
+open import ParaForge.Learning.Lens
+  using (Lens; lens; forward; backward)
 
 private
   variable
@@ -38,6 +39,16 @@ idₚₗ : ParametricLens (unitᶠ {v = pv} {f = pf}) A A
 idₚₗ = parametricLens
   (λ _ input → input)
   (λ _ _ feedback → tt , feedback)
+
+-- An ordinary lens is a parameterized lens with no effective parameters. This
+-- lets parameter-free nonlinearities participate in parameterized composition
+-- without pretending that they produce an updateable signal.
+parameterFree :
+  Lens A B →
+  ParametricLens (unitᶠ {v = pv} {f = pf}) A B
+parameterFree L = parametricLens
+  (λ _ input → forward L input)
+  (λ _ input feedback → tt , backward L (input , feedback))
 
 -- Read `later ∘ₚₗ first` from right to left. Parameters and their signals both
 -- use the established later-before-earlier order Q × P.
