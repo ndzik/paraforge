@@ -99,7 +99,7 @@ For example, two shared Transformer blocks have eight parameter-consuming occurr
 [0, 1, 2, 3, 0, 1, 2, 3]
 ```
 
-The executable architecture model intentionally uses small scalar stand-ins. ParaForge does not yet provide tensor kernels, automatic differentiation, optimization, or integration with an ML runtime. Attention is represented as an architecture-level primitive rather than expanded into tensor contractions.
+The executable architecture model intentionally uses small scalar stand-ins. ParaForge does not yet provide tensor kernels, automatic differentiation, production numerical optimization, or integration with an ML runtime. Attention is represented as an architecture-level primitive rather than expanded into tensor contractions.
 
 ## Feedback lenses
 
@@ -107,7 +107,9 @@ The executable architecture model intentionally uses small scalar stand-ins. Par
 
 `ParametricLens` additionally separates parameter values from parameter signals. Composition retains the ParaForge order `Q × P`, propagates feedback in reverse execution order, and returns signals as `Q♭ × P♭`. The implementation currently recomputes intermediate activations during propagation.
 
-`UpdatePolicy` interprets parameter signals independently and may carry state. A `FeedbackSource` closes the output boundary, and `trainStep` exposes the output, output feedback, parameter and input signals, next updater state, and next parameter as one pure result. The exact integer reference supplies explicit reverse rules for translation, affine, and square operations, plus gradient descent and no-update policies. These are reference semantics rather than an automatic differentiation system. Architecture-term interpretation, fan-out aggregation, and runtime training loops are not yet provided.
+`UpdatePolicy` interprets parameter signals independently and may carry state. A `FeedbackSource` closes the output boundary, and `trainStep` exposes the output, output feedback, parameter and input signals, next updater state, and next parameter as one pure result. The exact integer reference supplies explicit reverse rules for translation, affine, and square operations, plus gradient descent and no-update policies. These are reference semantics rather than an automatic differentiation system.
+
+Backward structural wiring is explicit as well. `FeedbackMonoid` supplies ordered aggregation for copied activations, while optional commutativity remains separate evidence. `DataflowLearningModel` interprets copy, discard, swap, and reassociation as lenses and records compatibility between tensor encodings and feedback monoids. `ParameterLearningModel` gives declared reparameterizations their own backward transport; cartesian selections use `AllShareable` evidence to initialize deleted signals and aggregate repeated occurrences in order. Thus forward weight tying remains restriction along copying, while reverse sharing combines occurrence signals into one external parameter signal. Full architecture-term interpretation and runtime training loops are not yet provided.
 
 ## Algebraic structure and recurrence
 
