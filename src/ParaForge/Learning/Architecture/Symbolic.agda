@@ -4,8 +4,9 @@ module ParaForge.Learning.Architecture.Symbolic where
 
 open import Level using (Level; _⊔_)
 open import Data.Bool.Base using (Bool; true; false; if_then_else_)
-open import Data.List.Base using (List; []; _∷_; _++_)
-open import Data.Nat.Base using (ℕ; zero; suc)
+open import Data.List.Base using (List; []; _∷_; _++_; length)
+open import Data.Maybe.Base using (Maybe; just; nothing)
+open import Data.Nat.Base using (ℕ; zero; suc; _+_)
 open import Data.Nat.Properties using (_≟_)
 open import Relation.Nullary.Decidable.Core using (yes; no)
 
@@ -76,6 +77,96 @@ parameterRoute (cartesian evidence selection) =
   in cartesianRoute destinations (repeatedDestinations destinations)
 parameterRoute rightUnit = rightUnitRoute
 
+-- A normalized destination map exposes where every occurrence signal returns.
+-- `nothing` is retained for signature-declared generators whose backward map is
+-- intentionally opaque to the generic structural interpretation.
+contextDestinations :
+  ∀ {i p g} {Σ : Signature i p g} →
+  ℕ → Context Σ → List (Maybe ℕ)
+contextDestinations {Σ = Σ} offset [] = []
+contextDestinations {Σ = Σ} offset (_ ∷ Γ) =
+  just offset ∷ contextDestinations {Σ = Σ} (suc offset) Γ
+
+unknownDestinations :
+  ∀ {i p g} {Σ : Signature i p g} →
+  Context Σ → List (Maybe ℕ)
+unknownDestinations {Σ = Σ} [] = []
+unknownDestinations {Σ = Σ} (_ ∷ Γ) =
+  nothing ∷ unknownDestinations {Σ = Σ} Γ
+
+lookupDestination : ℕ → List (Maybe ℕ) → Maybe ℕ
+lookupDestination zero [] = nothing
+lookupDestination zero (destination ∷ _) = destination
+lookupDestination (suc index) [] = nothing
+lookupDestination (suc index) (_ ∷ destinations) =
+  lookupDestination index destinations
+
+substituteDestinations :
+  List (Maybe ℕ) → List (Maybe ℕ) → List (Maybe ℕ)
+substituteDestinations outer [] = []
+substituteDestinations outer (nothing ∷ rest) =
+  nothing ∷ substituteDestinations outer rest
+substituteDestinations outer (just index ∷ rest) =
+  lookupDestination index outer ∷ substituteDestinations outer rest
+
+shiftDestinations : ℕ → List (Maybe ℕ) → List (Maybe ℕ)
+shiftDestinations offset [] = []
+shiftDestinations offset (nothing ∷ rest) =
+  nothing ∷ shiftDestinations offset rest
+shiftDestinations offset (just index ∷ rest) =
+  just (offset + index) ∷ shiftDestinations offset rest
+
+externalContext :
+  ∀ {i p g} {Σ : Signature i p g} {Δ Γ} →
+  ParamWire Σ Δ Γ → Context Σ
+externalContext {Δ = Δ} _ = Δ
+
+occurrenceContext :
+  ∀ {i p g} {Σ : Signature i p g} {Δ Γ} →
+  ParamWire Σ Δ Γ → Context Σ
+occurrenceContext {Γ = Γ} _ = Γ
+
+parameterDestinations :
+  ∀ {i p g} {Σ : Signature i p g} {Δ Γ} →
+  ParamWire Σ Δ Γ → List (Maybe ℕ)
+parameterDestinations {Σ = Σ} wire@identity =
+  contextDestinations {Σ = Σ} zero (occurrenceContext wire)
+parameterDestinations (later ∘w earlier) =
+  substituteDestinations
+    (parameterDestinations earlier)
+    (parameterDestinations later)
+parameterDestinations (left ⊗w right) =
+  parameterDestinations left ++
+  shiftDestinations
+    (length (externalContext left))
+    (parameterDestinations right)
+parameterDestinations {Σ = Σ} wire@(generated _) =
+  unknownDestinations {Σ = Σ} (occurrenceContext wire)
+parameterDestinations {Σ = Σ} (cartesian evidence selection) =
+  knownSelectionDestinations {Σ = Σ} selection
+  where
+    knownSelectionDestinations :
+      ∀ {i p g} {Σ : Signature i p g} {Δ Γ} →
+      Selection Σ Δ Γ → List (Maybe ℕ)
+    knownSelectionDestinations {Σ = Σ} select[] = []
+    knownSelectionDestinations {Σ = Σ} (select slot rest) =
+      just (slotDestination slot) ∷
+      knownSelectionDestinations {Σ = Σ} rest
+parameterDestinations {Σ = Σ} wire@rightUnit =
+  contextDestinations {Σ = Σ} zero (occurrenceContext wire)
+
+knownDestinations : List (Maybe ℕ) → List ℕ
+knownDestinations [] = []
+knownDestinations (nothing ∷ rest) = knownDestinations rest
+knownDestinations (just destination ∷ rest) =
+  destination ∷ knownDestinations rest
+
+parameterAggregationSites :
+  ∀ {i p g} {Σ : Signature i p g} {Δ Γ} →
+  ParamWire Σ Δ Γ → List ℕ
+parameterAggregationSites wire =
+  repeatedDestinations (knownDestinations (parameterDestinations wire))
+
 -- Primitive and structural events are existentially indexed. A trace can
 -- retain the original typed code without erasing it to a backend operation.
 data LearningNode
@@ -96,13 +187,15 @@ record LearningStructure
     forwardNodes : List (LearningNode D)
     reverseNodes : List (LearningNode D)
     parameterRoutes : List (ParameterRoute Σ)
+    destinationMaps : List (List (Maybe ℕ))
+    aggregationMaps : List (List ℕ)
 
 open LearningStructure public
 
 emptyStructure :
   ∀ {i p g} {Σ : Signature i p g} {D : DataflowSignature Σ} →
   LearningStructure D
-emptyStructure = learningStructure [] [] []
+emptyStructure = learningStructure [] [] [] [] []
 
 sequentialStructure :
   ∀ {i p g} {Σ : Signature i p g} {D : DataflowSignature Σ} →
@@ -111,6 +204,8 @@ sequentialStructure first later = learningStructure
   (forwardNodes first ++ forwardNodes later)
   (reverseNodes later ++ reverseNodes first)
   (parameterRoutes later ++ parameterRoutes first)
+  (destinationMaps later ++ destinationMaps first)
+  (aggregationMaps later ++ aggregationMaps first)
 
 parallelStructure :
   ∀ {i p g} {Σ : Signature i p g} {D : DataflowSignature Σ} →
@@ -119,6 +214,8 @@ parallelStructure left right = learningStructure
   (forwardNodes left ++ forwardNodes right)
   (reverseNodes left ++ reverseNodes right)
   (parameterRoutes right ++ parameterRoutes left)
+  (destinationMaps right ++ destinationMaps left)
+  (aggregationMaps right ++ aggregationMaps left)
 
 restrictStructure :
   ∀ {i p g} {Σ : Signature i p g} {D : DataflowSignature Σ}
@@ -131,6 +228,8 @@ restrictStructure wire structure =
     (node ∷ forwardNodes structure)
     (reverseNodes structure ++ (node ∷ []))
     (route ∷ parameterRoutes structure)
+    (parameterDestinations wire ∷ destinationMaps structure)
+    (parameterAggregationSites wire ∷ aggregationMaps structure)
 
 module DescribeArchitecture
   {i p g : Level}
@@ -150,6 +249,8 @@ module DescribeArchitecture
     (primitiveNode operation ∷ [])
     (primitiveNode operation ∷ [])
     []
+    []
+    []
   describeCore (first >>>A later) =
     sequentialStructure (describeCore first) (describeCore later)
   describeCore (restrictA wire architecture) =
@@ -168,6 +269,8 @@ module DescribeArchitecture
   describeCartesian (wireC wire) = learningStructure
     (dataNode wire ∷ [])
     (dataNode wire ∷ [])
+    []
+    []
     []
   describeCartesian (restrictC wire architecture) =
     restrictStructure wire (describeCartesian architecture)
