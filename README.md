@@ -86,6 +86,8 @@ encoderBlock =
 
 `repeatIndependent` gives each block its own external parameter context. `repeatSharedNeural` uses one context for every occurrence, covering architectures such as ALBERT-style shared Transformer stacks.
 
+A separate backend-neutral tensor specialization provides scalar, vector, grid, unit, and structural-product shapes together with closed linear, convolution, activation, and addition codes. Its NCA example describes a fixed identity/Sobel perception bank, a two-layer trainable pointwise update, explicit residual fan-out, and four shared update steps over a `16 × 16 × 4` grid. The four steps retain two external trainable parameters and eight parameter-consuming occurrences. These are typed architecture codes; they do not implement numerical tensor kernels in Agda.
+
 ## Interpretation and inspection
 
 The same architecture description can be interpreted in more than one way:
@@ -99,7 +101,7 @@ For example, two shared Transformer blocks have eight parameter-consuming occurr
 [0, 1, 2, 3, 0, 1, 2, 3]
 ```
 
-The executable architecture model intentionally uses small scalar stand-ins. ParaForge does not yet provide tensor kernels, automatic differentiation, production numerical optimization, or integration with an ML runtime. Attention is represented as an architecture-level primitive rather than expanded into tensor contractions.
+The executable architecture model intentionally uses small scalar stand-ins. The tensor signature is currently declarative: ParaForge does not yet provide numerical tensor kernels, automatic differentiation, production numerical optimization, or integration with an ML runtime. Attention is represented as an architecture-level primitive rather than expanded into tensor contractions.
 
 ## Feedback lenses
 

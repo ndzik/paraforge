@@ -13,6 +13,11 @@ open import ParaForge.Architecture.Interpretation public
 import ParaForge.Architecture.Builder as GenericBuilder
 module Generic = GenericBuilder
 
+-- The closed tensor specialization is qualified so scalar/vector names do not
+-- collide with the lightweight neural reference signature.
+import ParaForge.Architecture.Tensor.Signature as TensorArchitecture
+module Tensor = TensorArchitecture
+
 open import ParaForge.Architecture.Builder.Neural public
 
 open import ParaForge.Architecture.Model public
