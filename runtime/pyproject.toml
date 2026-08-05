@@ -1,0 +1,22 @@
+[project]
+name = "paraforge-runtime"
+version = "0.1.0"
+description = "Strict validation and JAX interpretation of ParaForge architecture documents"
+readme = "README.md"
+authors = [
+    { name = "Norbert Dzikowski", email = "lambdax.one@icloud.com" }
+]
+requires-python = ">=3.11"
+dependencies = [
+    "jax>=0.10.2",
+]
+
+[build-system]
+requires = ["uv_build>=0.9.13,<0.10.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "jsonschema>=4.26.0",
+    "pytest>=9.1.1",
+]
