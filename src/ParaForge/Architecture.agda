@@ -18,6 +18,11 @@ module Generic = GenericBuilder
 import ParaForge.Architecture.Tensor.Signature as TensorArchitecture
 module Tensor = TensorArchitecture
 
+-- Export remains qualified because its closed constructors intentionally
+-- mirror some source architecture operations.
+import ParaForge.Architecture.Export as ExportArchitecture
+module Export = ExportArchitecture
+
 open import ParaForge.Architecture.Builder.Neural public
 
 open import ParaForge.Architecture.Model public

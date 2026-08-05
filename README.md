@@ -88,6 +88,8 @@ encoderBlock =
 
 A separate backend-neutral tensor specialization provides scalar, vector, grid, unit, and structural-product shapes together with closed linear, convolution, activation, and addition codes. Its NCA example describes a fixed identity/Sobel perception bank, a two-layer trainable pointwise update, explicit residual fan-out, and four shared update steps over a `16 × 16 × 4` grid. The four steps retain two external trainable parameters and eight parameter-consuming occurrences. These are typed architecture codes; they do not implement numerical tensor kernels in Agda.
 
+The NCA also compiles into a closed, shape-indexed export target whose primitives refer directly to typed external parameter slots. An explicit `compileSharedRollout` preserves repetition as `Repeat 4` without changing the source architecture syntax or guessing repetition from an expanded composition. A pure canonical encoder produces the versioned `examples/nca.json`; its two canonical parameter ids are reused in the order `[1,0,1,0,1,0,1,0]`. The independent standard-library-only parser in `runtime/ir.py` rejects unknown fields and versions, mistyped references, incompatible shapes, malformed structural wiring, and non-endomorphic repeats. It validates architecture only and imports no numerical backend.
+
 ## Interpretation and inspection
 
 The same architecture description can be interpreted in more than one way:

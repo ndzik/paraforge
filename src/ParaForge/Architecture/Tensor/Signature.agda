@@ -40,7 +40,7 @@ private
     height width channels : ℕ
 
 -- Every primitive has one closed, shape-indexed meaning. Convolutions use
--- same padding and unit stride, so their spatial dimensions are preserved.
+-- zero padding and unit stride, so their spatial dimensions are preserved.
 data TensorPrimitive :
   TensorContext → Shape → Shape → Set where
 
