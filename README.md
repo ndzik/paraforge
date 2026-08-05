@@ -1,205 +1,238 @@
-# Paraforge
+# ParaForge
 
-I love category theory and was, for quite some time, thinking about neural network architectures and how to encode them in a unified model.
+ParaForge is an experimental Agda library for describing parameterized
+architectures compositionally. It explores a simple question:
 
-Naturally I explored if papers were already out there and notably found [Categorical Deep Learning is an Algebraic Theory of All Architectures](https://arxiv.org/abs/2402.15332).
-I was happy to see I am not alone with the mere idea and that people already tackled some fundamentals.
+> Can the structure of a model, including parameter identity, sharing, dataflow,
+> and learning interfaces, remain explicit and type-checked from categorical
+> description to numerical execution?
 
-This repository is aimed at three things:
+The project combines categorical foundations, an intrinsically typed
+architecture language, symbolic and executable interpretations, and a small
+validated JAX bridge. Agda owns structure and static guarantees; Python/JAX
+owns numerical arrays and execution.
 
-1. Purely for myself, solidifying my understanding and forcing me to think it through.
-2. See if the abstraction really works across different older and newer architectures (if emergence is guaranteed)
-3. Provide a hands-on library that can be used for that kind of modeling.
+ParaForge is a research prototype, not a production deep-learning framework.
+It is inspired by
+[*Categorical Deep Learning is an Algebraic Theory of All
+Architectures*](https://arxiv.org/abs/2402.15332) and extends the paper's
+parameterized-map perspective toward explicit learning and structural reuse.
 
-I use Agda, because it naturally lends itself perfectly for this kind of application.
+## Why ParaForge?
 
-I am also grateful to all the contributors of [Agda](https://github.com/agda/agda) and [agda-categories](https://github.com/agda/agda-categories) library creators, so I did not have to come up with an ad-hoc condensed CT library to even start implementing it.
+Most model descriptions make computation easy to see but parameter structure
+hard to inspect. Sharing, deletion, reparameterization, residual dataflow, and
+feedback aggregation often become implicit implementation details.
 
-# Current State
+ParaForge instead treats them as typed structure:
 
-ParaForge can describe, compose, execute, and analyze typed parameterized architectures without committing them to a numerical machine-learning backend.
+- parameterized computations compose with explicit parameter order;
+- parameter sharing is represented by an explicit parameter binding;
+- activation wiring is distinct from parameter wiring;
+- forward architecture, feedback semantics, and update policy are separate;
+- one architecture can be executed, inspected symbolically, or exported;
+- numerical runtimes validate the proof-erased boundary independently.
 
-The bulk and most interesting parts of the paper are implemented.
-Right now I am drafting an updated category that explicitly models "learning".
-The hypothesis is, that this overview might give a little more insights into extracting "structural components" of trained models.
+This makes small but important questions mechanically observable: Which
+parameter does an occurrence use? Is a repeated block shared or independent?
+Where does copied feedback aggregate? Does exported execution preserve the
+source architecture's shape and sharing structure?
 
-## Parameterized computations
+## Capabilities
 
-A parameterized computation from `A` to `B` consists of a parameter object `P` and an evaluator `P ⊙ A → B`. ParaForge provides this construction at three levels:
+### Categorical foundations
 
-- an executable, universe-polymorphic `Para(Set)` reference model;
-- `Para(C)` for the tensor self-action of a monoidal category `C`;
-- `Para(M ↷ C)` for parameters in a monoidal category `M` acting on an independent computation category `C`.
+ParaForge includes an executable `Para(Set)` reference model and generic
+parameterized-map constructions for monoidal self-actions and arbitrary
+actegories. The formalization retains weak coherence explicitly and supports:
 
-Parameterized computations support identity and sequential composition. Composition combines the later parameters `Q` with the earlier parameters `P` in the order `Q ⊗ P`. The generic constructions form weak bicategories with explicit unitors, associators, naturality, interchange, triangle, and pentagon coherence.
+- parameterized identity and composition;
+- G.1-oriented reparameterization;
+- weak bicategory structure;
+- parameter restriction, copying, deletion, and weight tying;
+- strong actegorical endofunctors and monads;
+- Para-specialized pseudomonad data;
+- lax algebras and induced parameter comonoids.
 
-## Reparameterization and sharing
+### Typed architecture language
 
-A transformation `F ⇒ G` follows Definition G.1 and carries a parameter map from the parameters of `G` back to those of `F`. This makes reparameterization a behavior-preserving restriction: the target architecture can only realize behavior already represented by the source.
+`ParaForge.Architecture` provides intrinsically typed sequential and cartesian
+architecture syntax with:
 
-ParaForge supports:
-
-- arbitrary typed parameter restriction;
-- weight tying by restriction along a copy map;
-- parameter deletion through a counit;
-- repeated sharing governed by coassociativity;
-- optional permutation-invariant sharing when cocommutativity is available;
-- identity, vertical, and horizontal composition of architecture transformations.
-
-Copying and deletion are never assumed from a bare monoidal category or actegory. They require an explicit comonoid on the relevant parameter object.
-
-## Architecture language
-
-`ParaForge.Architecture` provides an intrinsically typed Agda-embedded architecture language. An architecture records its parameter context, input interface, and output interface in its type. The language includes:
-
-- primitive operations from an extensible typed signature;
+- typed primitive signatures;
 - sequential and parallel composition;
-- activation fan-out and structural data wiring;
-- residual composition;
-- explicit parameter bindings and lexical parameter sharing;
+- explicit data fan-out and structural wiring;
+- residual builders;
+- external parameter bindings;
+- lexical parameter references;
 - independent and shared finite repetition;
-- typed architecture transformations.
+- executable and symbolic interpretations.
 
-The core distinguishes sequential `CoreArch` syntax from the cartesian `CartesianArch` dataflow extension. A `Network` keeps its untied primitive occurrences separate from the external parameter binding that controls independence, deletion, permutation, or sharing.
+Examples include MLPs, pre-normalized Transformer blocks, shared Transformer
+stacks, and a neural cellular automaton (NCA).
 
-A sequential classifier can be written as:
+### Explicit learning semantics
 
-```agda
-mlp =
-  dense 2 3 >>>
-  relu 3 >>>
-  dense 3 1 >>>
-  softmax 1
-```
+`ParaForge.Learning` models learning separately from forward architecture. It
+provides typed feedback interfaces, compositional lenses, parameter signals,
+update policies, and explicit backward aggregation for copied or shared values.
+These abstractions do not identify feedback with gradients or updates with
+gradient descent.
 
-Transformer parameters are ordinary, intrinsically typed Agda references. Named branches can share one lexical parameter scope with `_>>>ˢ_`, while `residualTokens` inserts activation fan-out and recombination:
+The current neural examples use structural and symbolic feedback descriptions.
+Numerical neural derivatives remain the responsibility of an external backend.
 
-```agda
-attentionBranch =
-  layerNormUsing firstNormParameter >>>ˢ
-  selfAttentionUsing attentionParameter
+### Tensor export and JAX execution
 
-encoderBlock =
-  residualTokens sequenceLength modelWidth attentionBranch >>>ˢ
-  residualTokens sequenceLength modelWidth feedForwardBranch
-```
-
-`repeatIndependent` gives each block its own external parameter context. `repeatSharedNeural` uses one context for every occurrence, covering architectures such as ALBERT-style shared Transformer stacks.
-
-A separate backend-neutral tensor specialization provides scalar, vector, grid, unit, and structural-product shapes together with closed linear, convolution, activation, and addition codes. Its NCA example describes a fixed identity/Sobel perception bank, a two-layer trainable pointwise update, explicit residual fan-out, and four shared update steps over a `16 × 16 × 4` grid. The four steps retain two external trainable parameters and eight parameter-consuming occurrences. These are typed architecture codes; they do not implement numerical tensor kernels in Agda.
-
-The NCA also compiles into a closed, shape-indexed export target whose primitives refer directly to typed external parameter slots. An explicit `compileSharedRollout` preserves repetition as `Repeat 4` without changing the source architecture syntax or guessing repetition from an expanded composition. A pure canonical encoder produces the versioned `examples/nca.json`; its two canonical parameter ids are reused in the order `[1,0,1,0,1,0,1,0]`. The independent standard-library-only parser in `runtime/ir.py` rejects unknown fields and versions, mistyped references, incompatible shapes, malformed structural wiring, and non-endomorphic repeats. It validates architecture only and imports no numerical backend.
-
-## Interpretation and inspection
-
-The same architecture description can be interpreted in more than one way:
-
-- the executable `Sets` model runs lightweight reference evaluators and makes parameter order and sharing observable;
-- the symbolic model reports typed nodes, composition depth, raw parameter occurrences, external parameter count, and sharing classes.
-
-For example, two shared Transformer blocks have eight parameter-consuming occurrences but only four external parameter variables. Their symbolic sharing classes are:
+A backend-neutral tensor signature describes grids, linear maps,
+convolutions, fixed kernels, activation, addition, and structural products. The
+example NCA consists of:
 
 ```text
-[0, 1, 2, 3, 0, 1, 2, 3]
+16 × 16 × 4 state
+  → fixed identity/Sobel perception
+  → pointwise linear 12 → 16
+  → ReLU
+  → pointwise linear 16 → 4
+  → residual state update
+  → four shared steps
 ```
 
-The executable architecture model intentionally uses small scalar stand-ins. The tensor signature is currently declarative: ParaForge does not yet provide numerical tensor kernels, automatic differentiation, production numerical optimization, or integration with an ML runtime. Attention is represented as an architecture-level primitive rather than expanded into tensor contractions.
+The architecture has two external trainable parameters and eight
+parameter-consuming occurrences. It compiles to the canonical
+[`examples/nca.json`](examples/nca.json), where target-level repetition retains
+one shared step rather than duplicating parameter declarations.
 
-## Feedback lenses
+The standalone [`runtime/`](runtime/) package:
 
-`ParaForge.Learning` provides a separate executable layer for bidirectional computations. A `FeedbackInterface` keeps forward values distinct from the feedback sent against them. A `Lens` supplies forward evaluation and backward feedback propagation, with identity and sequential composition packaged as an `agda-categories` category under pointwise behavioral equality.
+- strictly validates the versioned document after proof erasure;
+- deterministically initializes parameters from an explicit JAX key;
+- interprets every version-1 numerical and structural operation;
+- executes the NCA eagerly or with `jax.jit`;
+- checks runtime shapes and parameter values, with explicit finite-output tests.
 
-`ParametricLens` additionally separates parameter values from parameter signals. Composition retains the ParaForge order `Q × P`, propagates feedback in reverse execution order, and returns signals as `Q♭ × P♭`. The implementation currently recomputes intermediate activations during propagation.
+## Quick start
 
-`UpdatePolicy` interprets parameter signals independently and may carry state. A `FeedbackSource` closes the output boundary, and `trainStep` exposes the output, output feedback, parameter and input signals, next updater state, and next parameter as one pure result. The exact integer reference supplies explicit reverse rules for translation, affine, and square operations, plus gradient descent and no-update policies. These are reference semantics rather than an automatic differentiation system.
+### Check the Agda library
 
-Backward structural wiring is explicit as well. `FeedbackMonoid` supplies ordered aggregation for copied activations, while optional commutativity remains separate evidence. `DataflowLearningModel` interprets copy, discard, swap, and reassociation as lenses and records compatibility between tensor encodings and feedback monoids. `ParameterLearningModel` gives declared reparameterizations their own backward transport; cartesian selections use `AllShareable` evidence to initialize deleted signals and aggregate repeated occurrences in order. Thus forward weight tying remains restriction along copying, while reverse sharing combines occurrence signals into one external parameter signal.
+ParaForge depends on `standard-library-2.4` and `agda-categories`, as declared in
+[`paraforge.agda-lib`](paraforge.agda-lib).
 
-`ArchitectureLearningModel` is the backend-neutral interpretation boundary. A model supplies typed value and feedback carriers plus primitive behavior, and the generic fold interprets existing `CoreArch`, `CartesianArch`, `Network`, and architecture cells without knowing about arrays, devices, autodiff, or a particular runtime. A separate structural interpretation records forward and reverse nodes, normalized parameter destinations, and aggregation sites. Signature-declared opaque reparameterizations remain unknown rather than receiving invented reverse behavior.
-
-The existing MLP, finite independent/shared sequences, pre-normalized Transformer block, and independent/shared Transformer stacks have structural learning interpretations. Their checks expose reverse primitive order, residual fan-out, and shared occurrence aggregation. In particular, the shared two-block Transformer retains eight parameter-consuming occurrences, four external parameters, and aggregation destinations `[0, 1, 2, 3]`. A symbolic feedback-event witness agrees forward with the existing lightweight `Sets` semantics but implements no neural derivatives or updates.
-
-The categorical boundary is independent of numerical runtime choice. External backends own tensor kernels, numerical derivatives, automatic differentiation, optimizers, devices, and training loops. JAX is the first planned backend, not an assumption of the architecture or learning interfaces. Tensor execution, numerical neural derivatives, and runtime training loops are not yet provided.
-
-## Algebraic structure and recurrence
-
-The generic API also provides:
-
-- strong actegorical endofunctors and their pseudofunctorial lift to `Para`;
-- strong actegorical monads and specialized weak pseudomonad data on `Para`;
-- algebras and coalgebras for parameterized structure maps;
-- lax algebras and structural lax algebra morphisms;
-- extraction of parameter comonoids from lax algebra coherence;
-- finite shared folds and parameterized state-machine examples.
-
-The executable examples include folding cells, finite-list folds, exception algebras, unfolding coalgebra shapes, MLPs, Transformer blocks, and independent or shared architecture repetition.
-
-## Imports
-
-The root facade is the concrete executable API:
-
-```agda
-open import ParaForge
+```bash
+agda --build-library
 ```
 
-The generic APIs are namespaced to avoid collisions with concrete names such as `Para`, `idₚ`, and `_∘ₚ_`:
-
-```agda
-import ParaForge.Monoidal as Monoidal
-import ParaForge.Actegory as Actegory
-```
-
-The architecture and learning languages are exposed through separate facades. Importing the learning facade qualified keeps its generic `Value` projection distinct from the executable architecture model's `Value` family:
-
-```agda
-open import ParaForge.Architecture
-import ParaForge.Learning as Learning
-```
-
-`ParaForge.Monoidal` exports the tensor self-action construction and its cartesian `Sets` specialization. `ParaForge.Actegory` exports the coherent action interface, generic parameterized maps and cells, parameter restriction, comonoid sharing and deletion, strong endofunctors and monads, their Para lifts, lax algebras, induced parameter comonoids, algebra and coalgebra structure maps, `Sets` instances, and `ParaActegory`. Lower-level modules under `ParaForge.Para.*` and `ParaForge.Actegory.Core` are implementation modules.
-
-## Universe constraints
-
-For `C : Category o ℓ e` and `M : Monoidal C`, the generic levels are:
+All source modules are checked with:
 
 ```text
-Para M A B                         : Set (o ⊔ ℓ)
-Reparameterization M F G          : Set (ℓ ⊔ e)
-Hom M A B                         : Category (o ⊔ ℓ) (ℓ ⊔ e) e
-ParaMonoidal M                    : Bicategory (o ⊔ ℓ) (ℓ ⊔ e) e o
+--safe --without-K
 ```
 
-For `M : Category oₘ ℓₘ eₘ` acting on `C : Category o𝒞 ℓ𝒞 e𝒞`, the general construction has levels:
+The formalization uses no postulates or unsafe escape hatches.
+
+### Run the validated JAX runtime
+
+The Python runtime is a locked [`uv`](https://docs.astral.sh/uv/) project:
+
+```bash
+cd runtime
+uv sync
+uv run pytest
+```
+
+A minimal forward execution is:
+
+```python
+from pathlib import Path
+
+import jax
+import jax.numpy as jnp
+
+from paraforge_runtime.ir import load_document
+from paraforge_runtime.jax_interpreter import apply, initialize
+
+architecture = load_document(Path("../examples/nca.json"))
+parameters = initialize(architecture, jax.random.key(42))
+state = jnp.zeros((16, 16, 4), dtype=jnp.float32)
+result = apply(architecture, parameters, state)
+```
+
+Initialization is reproducible for a fixed key. Forward application is pure and
+reuses the same external parameter values wherever the architecture shares
+them.
+
+## Conceptual boundary
 
 ```text
-Para A X Y                         : Set (oₘ ⊔ ℓ𝒞)
-Reparameterization A F G          : Set (ℓₘ ⊔ e𝒞)
-ParaActegory A                    : Bicategory (oₘ ⊔ ℓ𝒞) (ℓₘ ⊔ e𝒞) eₘ o𝒞
-Strength A F                      : Set (oₘ ⊔ ℓₘ ⊔ o𝒞 ⊔ ℓ𝒞 ⊔ e𝒞)
-StrongEndofunctor A               : Set (oₘ ⊔ ℓₘ ⊔ o𝒞 ⊔ ℓ𝒞 ⊔ e𝒞)
-StrongMonad A                     : Set (oₘ ⊔ ℓₘ ⊔ o𝒞 ⊔ ℓ𝒞 ⊔ e𝒞)
-ParaPseudomonad S                 : Set (oₘ ⊔ ℓₘ ⊔ eₘ ⊔ o𝒞 ⊔ ℓ𝒞 ⊔ e𝒞)
-LaxAlgebra S X                    : Set (oₘ ⊔ ℓₘ ⊔ eₘ ⊔ ℓ𝒞 ⊔ e𝒞)
-Algebra S X                       : Set (oₘ ⊔ ℓ𝒞)
-Coalgebra S X                     : Set (oₘ ⊔ ℓ𝒞)
+Agda source architecture
+       ├── executable reference interpretation
+       ├── symbolic structure and parameter routes
+       ├── abstract feedback interpretation
+       └── typed export compilation
+                    ↓
+             canonical JSON
+                    ↓
+          strict runtime validation
+                    ↓
+          deterministic JAX execution
 ```
 
-Specializing to `Sets ℓ` gives `Bicategory (suc ℓ) ℓ ℓ (suc ℓ)`, corresponding to concrete `ParaSet ℓ ℓ`. General actions permit parameter and computation categories to have independent levels without an implicit lifting construction.
+The division of responsibility is deliberate:
 
-## Formal guarantees and scope
+| Agda owns                                    | Numerical backends own         |
+| ---                                          | ---                            |
+| typed interfaces and composition             | arrays and tensor kernels      |
+| parameter identity and sharing               | initialization and devices     |
+| structural data and parameter wiring         | automatic differentiation      |
+| abstract feedback composition                | losses and optimization        |
+| export structure and canonical serialization | training loops and checkpoints |
 
-ParaForge retains weak monoidal, actegory, and bicategorical coherence explicitly rather than strictifying parameter products. Equalities between transformations are stated through the relevant categorical hom-setoids instead of propositional equality of proof-containing records.
+JAX is the first runtime, not part of the categorical or architecture
+interfaces.
 
-The formalization covers the general actegory form of Definition G.1, monoidal self-actions and concrete `Set` specializations, diagonal weight tying, strong endofunctor and monad lifts, lax algebra parameter comonoids, algebraic folding cells, coalgebraic state-machine cells, and finite shared recurrence.
+## Repository guide
 
-`ParaPseudomonad` is a Para-specific certificate because `agda-categories` does not provide general records for pseudonatural transformations, modifications, or pseudomonads. It does not replace a general bicategorical API.
+| Path                                                                 | Purpose                                                |
+| ---                                                                  | ---                                                    |
+| [`src/ParaForge.agda`](src/ParaForge.agda)                           | Concrete executable facade                             |
+| [`src/ParaForge/Architecture.agda`](src/ParaForge/Architecture.agda) | Typed architecture facade                              |
+| [`src/ParaForge/Learning.agda`](src/ParaForge/Learning.agda)         | Explicit learning facade                               |
+| [`src/ParaForge/Examples/`](src/ParaForge/Examples/)                 | Checked examples                                       |
+| [`runtime/`](runtime/)                                               | Strict parser and deterministic JAX interpreter        |
+| [`schema/`](schema/)                                                 | Closed versioned export schema                         |
+| [`docs/design/`](docs/design/)                                       | Architectural decisions and formal design notes        |
 
-All Agda modules type-check under `--safe --without-K`, without postulates, function extensionality, proof irrelevance, or UIP. Tensor runtimes, infinite unrolling, streams, differentiation, optimization, and training semantics are outside the implemented scope.
+Recommended design notes:
 
-# Why?
+- [Foundations](docs/design/0001-foundations.md)
+- [Actegory interface](docs/design/0003-actegory-interface.md)
+- [Parameter wiring](docs/design/0004-parameter-wiring.md)
+- [Architecture language](docs/design/0007-architecture-language.md)
+- [Explicit compositional learning](docs/design/0008-explicit-compositional-learning.md)
+- [Versioned export boundary](docs/design/0009-versioned-export-boundary.md)
+- [Deterministic JAX interpretation](docs/design/0010-deterministic-jax-interpretation.md)
 
-It's fun.
+The longer-term typed architecture and library-learning direction is described
+in [the structural library learning note](docs/research/structural-library-learning.md).
 
-# AI Note
+## Current limitations
 
-Yes, I am collaborating with an agent while developing this. It's just faster, what can I say.
+- The JAX runtime implements deterministic forward execution only; losses,
+  autodiff, optimizers, and training loops are not yet included.
+- The tensor export vocabulary is intentionally small and closed.
+- Transformer examples are structurally typed but are not exported as complete
+  numerical attention kernels.
+- Repetition is finite; streams and infinite unrolling are outside the current
+  implementation.
+- Structural and library learning are research directions, not implemented
+  search or extraction systems.
+- Runtime semantic correspondence is tested after proof erasure; it is not a
+  formal proof of JAX itself.
+
+## Acknowledgements
+
+ParaForge builds on Agda,
+[`agda-categories`](https://github.com/agda/agda-categories), and the work of the
+categorical deep-learning community. The project began as a way to learn the
+material by making its obligations executable; and because category theory is
+fun!

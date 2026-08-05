@@ -1,0 +1,243 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://paraforge.dev/schema/paraforge-architecture-v1.schema.json",
+  "title": "ParaForge architecture document version 1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "version", "input", "output", "parameters", "operation"],
+  "properties": {
+    "schema": { "const": "paraforge-architecture" },
+    "version": { "const": 1 },
+    "input": { "$ref": "#/$defs/shape" },
+    "output": { "$ref": "#/$defs/shape" },
+    "parameters": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/parameter" }
+    },
+    "operation": { "$ref": "#/$defs/operation" }
+  },
+  "$defs": {
+    "positive": { "type": "integer", "minimum": 1 },
+    "natural": { "type": "integer", "minimum": 0 },
+    "unitShape": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type"],
+      "properties": { "type": { "const": "unit" } }
+    },
+    "scalarShape": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type"],
+      "properties": { "type": { "const": "scalar" } }
+    },
+    "vectorShape": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "features"],
+      "properties": {
+        "type": { "const": "vector" },
+        "features": { "$ref": "#/$defs/positive" }
+      }
+    },
+    "gridShape": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "height", "width", "channels"],
+      "properties": {
+        "type": { "const": "grid" },
+        "height": { "$ref": "#/$defs/positive" },
+        "width": { "$ref": "#/$defs/positive" },
+        "channels": { "$ref": "#/$defs/positive" }
+      }
+    },
+    "productShape": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "left", "right"],
+      "properties": {
+        "type": { "const": "product" },
+        "left": { "$ref": "#/$defs/shape" },
+        "right": { "$ref": "#/$defs/shape" }
+      }
+    },
+    "shape": {
+      "oneOf": [
+        { "$ref": "#/$defs/unitShape" },
+        { "$ref": "#/$defs/scalarShape" },
+        { "$ref": "#/$defs/vectorShape" },
+        { "$ref": "#/$defs/gridShape" },
+        { "$ref": "#/$defs/productShape" }
+      ]
+    },
+    "linearParameter": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "kind", "input_features", "output_features"],
+      "properties": {
+        "id": { "$ref": "#/$defs/natural" },
+        "kind": { "const": "linear" },
+        "input_features": { "$ref": "#/$defs/positive" },
+        "output_features": { "$ref": "#/$defs/positive" }
+      }
+    },
+    "convolutionParameter": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "kind", "kernel_height", "kernel_width", "input_channels", "output_channels"],
+      "properties": {
+        "id": { "$ref": "#/$defs/natural" },
+        "kind": { "const": "convolution" },
+        "kernel_height": { "$ref": "#/$defs/positive" },
+        "kernel_width": { "$ref": "#/$defs/positive" },
+        "input_channels": { "$ref": "#/$defs/positive" },
+        "output_channels": { "$ref": "#/$defs/positive" }
+      }
+    },
+    "parameter": {
+      "oneOf": [
+        { "$ref": "#/$defs/linearParameter" },
+        { "$ref": "#/$defs/convolutionParameter" }
+      ]
+    },
+    "identityOperation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "shape"],
+      "properties": {
+        "type": { "const": "identity" },
+        "shape": { "$ref": "#/$defs/shape" }
+      }
+    },
+    "sequentialOperation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "first", "later"],
+      "properties": {
+        "type": { "const": "sequential" },
+        "first": { "$ref": "#/$defs/operation" },
+        "later": { "$ref": "#/$defs/operation" }
+      }
+    },
+    "parallelOperation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "left", "right"],
+      "properties": {
+        "type": { "const": "parallel" },
+        "left": { "$ref": "#/$defs/operation" },
+        "right": { "$ref": "#/$defs/operation" }
+      }
+    },
+    "structuralOperation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "input", "output"],
+      "properties": {
+        "type": {
+          "enum": ["copy", "discard", "swap", "associate_left", "associate_right"]
+        },
+        "input": { "$ref": "#/$defs/shape" },
+        "output": { "$ref": "#/$defs/shape" }
+      }
+    },
+    "linearOperation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "height", "width", "input_features", "output_features", "parameter"],
+      "properties": {
+        "type": { "const": "linear" },
+        "height": { "$ref": "#/$defs/positive" },
+        "width": { "$ref": "#/$defs/positive" },
+        "input_features": { "$ref": "#/$defs/positive" },
+        "output_features": { "$ref": "#/$defs/positive" },
+        "parameter": { "$ref": "#/$defs/natural" }
+      }
+    },
+    "convolutionOperation": {
+      "description": "A trainable zero-padded, unit-stride convolution preserving spatial height and width.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "height", "width", "kernel_height", "kernel_width", "input_channels", "output_channels", "parameter"],
+      "properties": {
+        "type": { "const": "convolution" },
+        "height": { "$ref": "#/$defs/positive" },
+        "width": { "$ref": "#/$defs/positive" },
+        "kernel_height": { "$ref": "#/$defs/positive" },
+        "kernel_width": { "$ref": "#/$defs/positive" },
+        "input_channels": { "$ref": "#/$defs/positive" },
+        "output_channels": { "$ref": "#/$defs/positive" },
+        "parameter": { "$ref": "#/$defs/natural" }
+      }
+    },
+    "ncaPerceptionKernel": {
+      "description": "Channel-wise identity, Sobel-x, and Sobel-y filters in interleaved output order. Identity has centre coefficient 1. Sobel-x is [[-1,0,1],[-2,0,2],[-1,0,1]]/8 and Sobel-y is [[-1,-2,-1],[0,0,0],[1,2,1]]/8. Values outside the grid are zero.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "channels", "boundary"],
+      "properties": {
+        "type": { "const": "nca_perception" },
+        "channels": { "$ref": "#/$defs/positive" },
+        "boundary": { "const": "zero" }
+      }
+    },
+    "fixedConvolutionOperation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "height", "width", "kernel"],
+      "properties": {
+        "type": { "const": "fixed_convolution" },
+        "height": { "$ref": "#/$defs/positive" },
+        "width": { "$ref": "#/$defs/positive" },
+        "kernel": { "$ref": "#/$defs/ncaPerceptionKernel" }
+      }
+    },
+    "activationOperation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "height", "width", "channels", "activation"],
+      "properties": {
+        "type": { "const": "activation" },
+        "height": { "$ref": "#/$defs/positive" },
+        "width": { "$ref": "#/$defs/positive" },
+        "channels": { "$ref": "#/$defs/positive" },
+        "activation": { "const": "relu" }
+      }
+    },
+    "addOperation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "height", "width", "channels"],
+      "properties": {
+        "type": { "const": "add" },
+        "height": { "$ref": "#/$defs/positive" },
+        "width": { "$ref": "#/$defs/positive" },
+        "channels": { "$ref": "#/$defs/positive" }
+      }
+    },
+    "repeatOperation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "count", "body"],
+      "properties": {
+        "type": { "const": "repeat" },
+        "count": { "$ref": "#/$defs/natural" },
+        "body": { "$ref": "#/$defs/operation" }
+      }
+    },
+    "operation": {
+      "oneOf": [
+        { "$ref": "#/$defs/identityOperation" },
+        { "$ref": "#/$defs/sequentialOperation" },
+        { "$ref": "#/$defs/parallelOperation" },
+        { "$ref": "#/$defs/structuralOperation" },
+        { "$ref": "#/$defs/linearOperation" },
+        { "$ref": "#/$defs/convolutionOperation" },
+        { "$ref": "#/$defs/fixedConvolutionOperation" },
+        { "$ref": "#/$defs/activationOperation" },
+        { "$ref": "#/$defs/addOperation" },
+        { "$ref": "#/$defs/repeatOperation" }
+      ]
+    }
+  }
+}
